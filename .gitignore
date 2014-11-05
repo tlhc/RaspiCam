@@ -1,4 +1,7 @@
+#dirs
+build-RaspiCamClient-4_8-Debug/
+RaspiCamClient/RaspiCamClient.pro.*
+
 *.log
 *.pyc
-./client/build-RaspiCamClient-4_8-Debug/
-./client/RaspiCamClient/RaspiCamClient.pro.*
+
