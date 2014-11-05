@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -13,8 +13,17 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        raspcammw.cpp
+        raspcammw.cpp \
+    videoview.cpp \
+    tcprequest.cpp \
+    netscaner.cpp
 
-HEADERS  += raspcammw.h
+HEADERS  += raspcammw.h \
+    videoview.h \
+    tcprequest.h \
+    netscaner.h
 
 FORMS    += raspcammw.ui
+
+
+unix:LIBS += -lvlc

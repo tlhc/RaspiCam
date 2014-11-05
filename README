@@ -11,5 +11,6 @@ before use :
     pyhton-pip -- sudo apt-get install python-pip
     vlc        -- sudo apt-get install vlc
     netifaces  -- sudo pip install netifaces
-    may be has other packeges or components not mention above you may install 
+
+    may be has other packeges or components not mentioned above you may install 
     by yourself.
