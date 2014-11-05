@@ -1,3 +1,3 @@
 *.log
 *.pyc
-
+./client/build-RaspiCamClient-4_8-Debug/

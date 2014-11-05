@@ -4,3 +4,12 @@ Server:
     Capture video use raspivid and Streaming video use vlc
 Client:
     Play video use libvlc based on Qt
+
+before use :
+    check Server(RaspiberryPi) installed these components:
+    python-dev -- sudo apt-get install python-dev
+    pyhton-pip -- sudo apt-get install python-pip
+    vlc        -- sudo apt-get install vlc
+    netifaces  -- sudo pip install netifaces
+    may be has other packeges or components not mention above you may install 
+    by yourself.
