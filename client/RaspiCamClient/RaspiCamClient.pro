@@ -16,12 +16,14 @@ SOURCES += main.cpp\
         raspcammw.cpp \
     videoview.cpp \
     tcprequest.cpp \
-    netscaner.cpp
+    netscaner.cpp \
+    controlclient.cpp
 
 HEADERS  += raspcammw.h \
     videoview.h \
     tcprequest.h \
-    netscaner.h
+    netscaner.h \
+    controlclient.h
 
 FORMS    += raspcammw.ui
 

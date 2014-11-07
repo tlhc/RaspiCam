@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>714</width>
-    <height>599</height>
+    <height>610</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>0</y>
+      <y>20</y>
       <width>691</width>
       <height>491</height>
      </rect>
@@ -28,7 +28,7 @@
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>510</y>
+      <y>530</y>
       <width>99</width>
       <height>27</height>
      </rect>
@@ -40,8 +40,8 @@
    <widget class="QPushButton" name="btnStart">
     <property name="geometry">
      <rect>
-      <x>230</x>
-      <y>510</y>
+      <x>190</x>
+      <y>530</y>
       <width>99</width>
       <height>27</height>
      </rect>
@@ -53,8 +53,8 @@
    <widget class="QPushButton" name="btnStop">
     <property name="geometry">
      <rect>
-      <x>450</x>
-      <y>510</y>
+      <x>410</x>
+      <y>530</y>
       <width>99</width>
       <height>27</height>
      </rect>
@@ -66,14 +66,27 @@
    <widget class="QPushButton" name="btnRecord">
     <property name="geometry">
      <rect>
-      <x>340</x>
-      <y>510</y>
+      <x>300</x>
+      <y>530</y>
       <width>99</width>
       <height>27</height>
      </rect>
     </property>
     <property name="text">
      <string>Record</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lbl_address">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>0</y>
+      <width>301</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>address:</string>
     </property>
    </widget>
   </widget>

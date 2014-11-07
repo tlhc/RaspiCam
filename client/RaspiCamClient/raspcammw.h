@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include "videoview.h"
 #include "tcprequest.h"
+#include "netscaner.h"
+#include "controlclient.h"
 
 namespace Ui {
 class RaspCamMW;
@@ -19,12 +21,10 @@ public:
 
 private slots:
     void on_btnScan_clicked();
-
     void on_btnStart_clicked();
-
     void on_btnStop_clicked();
-
     void on_btnRecord_clicked();
+    void recvmsg(QString msg);
 
 private:
     void _extUISetUp();
@@ -32,7 +32,8 @@ private:
     VideoView *_vview;
     Ui::RaspCamMW *ui;
     QString _streamurl;
-
+    NetScaner *scan;
+    ControlClient *ctlc;
 };
 
 #endif // RASPCAMMW_H

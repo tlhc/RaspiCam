@@ -1,6 +1,132 @@
 #include "netscaner.h"
+#include <QNetworkAddressEntry>
+#include <QHostAddress>
+#include <QNetworkInterface>
+#include <QDebug>
+#include <QTimer>
+#include <QStringList>
 
-NetScaner::NetScaner(QObject *parent) :
-    QObject(parent)
+ScanWorker::ScanWorker(QString intfname, QHostAddress iprange, QHostAddress netmask) :
+    _intfname(intfname),
+    _iprange(iprange),
+    _netmask(netmask)
 {
+
+}
+
+ScanWorker::~ScanWorker() {
+    qDebug() << Q_FUNC_INFO;
+}
+
+void ScanWorker::process() {
+
+    qDebug() << _intfname
+             << _iprange.toString()
+             << _netmask.toString()
+             << QThread::currentThreadId();
+    quint32 netaddr = _iprange.toIPv4Address() & _netmask.toIPv4Address();
+    quint32 wildmask = ~_netmask.toIPv4Address();
+    for(quint32 address = netaddr + 1; address < netaddr + wildmask; address++) {
+        TcpRequest* _request = new TcpRequest(this);
+        if(_request->connectHost(QHostAddress(address), 9999, 10)) {
+            /*_request is asyn so we may not sendData here
+             * thread may exit before the request return
+            */
+            emit getone(QHostAddress(address).toString());
+        }
+        _request->close();
+        delete _request;
+    }
+    qDebug() << QThread::currentThreadId();
+    emit finished();
+}
+
+NetScaner::NetScaner(QObject *parent) : QObject(parent)
+{
+    QList<QNetworkInterface> _intflist;
+    _intflist = QNetworkInterface::allInterfaces();
+    //construct worker list
+    QList<QNetworkInterface>::iterator iter = _intflist.begin();
+    int avflag = QNetworkInterface::IsUp | QNetworkInterface::IsRunning |
+                 QNetworkInterface::CanBroadcast | QNetworkInterface::CanMulticast;
+    for(; iter != _intflist.end(); iter++) {
+        if((*iter).flags() != avflag) {
+            continue;
+        }
+        QList<QNetworkAddressEntry> tmp = (*iter).addressEntries();
+        QNetworkAddressEntry entry;
+        qDebug() << "network interface";
+        foreach (entry, tmp) {
+            if(entry.ip().protocol() == QAbstractSocket::IPv4Protocol) {
+                qDebug() << (*iter).name() << entry.ip() << entry.netmask();
+                _workerlist.append(new ScanWorker((*iter).name(), entry.ip(), entry.netmask()));
+            }
+        }
+    }
+    for(int i = 0; i < _workerlist.size(); i++) {
+        _thrlist.append(new QThread(this));
+    }
+    for(int i = 0; i < _workerlist.size(); i++) {
+        _workerlist.at(i)->moveToThread(_thrlist.at(i));
+        connect(_workerlist.at(i), SIGNAL(error(QString)), this, SLOT(error(QString)));
+        connect(_workerlist.at(i), SIGNAL(getone(QString)), this, SLOT(getone(QString)));
+        connect(_thrlist.at(i), SIGNAL(started()), _workerlist.at(i), SLOT(process()));
+        connect(_workerlist.at(i), SIGNAL(finished()), _thrlist.at(i), SLOT(quit()));
+        connect(_workerlist.at(i), SIGNAL(finished()), _workerlist.at(i), SLOT(deleteLater()));
+        connect(_thrlist.at(i), SIGNAL(finished()), _thrlist.at(i), SLOT(deleteLater()));
+    }
+}
+
+NetScaner::~NetScaner()
+{
+    /*TODO .. CHECK*/
+    qDeleteAll(_workerlist.begin(), _workerlist.end());
+    _workerlist.clear();
+    qDeleteAll(_thrlist.begin(), _thrlist.end());
+    _thrlist.clear();
+    qDebug() << Q_FUNC_INFO;
+}
+
+void NetScaner::start() {
+    for(int i = 0; i < _workerlist.size(); i++) {
+        _thrlist.at(i)->start();
+    }
+}
+
+QString NetScaner::ret() const {
+    return _ret;
+}
+
+void NetScaner::error(QString err) {
+    qDebug() << err << Q_FUNC_INFO;
+}
+
+void NetScaner::getone(QString one) {
+    TcpRequest *vreq = new TcpRequest(this);
+    if(vreq->connectHost(QHostAddress(one), 9999, 100)) {
+        connect(vreq, SIGNAL(sigmsg(QString)), this, SLOT(verityslot(QString)));
+        vreq->sendData("get");
+    }
+}
+
+void NetScaner::verityslot(QString msg) {
+    if(_verifymsg(msg)) {
+        emit routeOut(msg);
+    }
+}
+
+bool NetScaner::_verifymsg(QString msg) {
+    if(msg.isEmpty()) {
+        return false;
+    }
+    QStringList splist = msg.split(":");
+    if(splist.length() == 2) {
+        QHostAddress _host;
+        bool ok = false;
+        int _port = splist.at(1).toInt(&ok);
+        if(_host.setAddress(splist.at(0)) && ok && (_port > 0 && _port < 65535)) {
+            return true;
+        }
+    }
+    return false;
 }
