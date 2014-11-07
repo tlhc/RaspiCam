@@ -62,18 +62,16 @@ NetScaner::NetScaner(QObject *parent) : QObject(parent)
         connect(_workerlist.at(i), SIGNAL(getone(QString)), this, SLOT(getone(QString)));
         connect(_thrlist.at(i), SIGNAL(started()), _workerlist.at(i), SLOT(process()));
         connect(_workerlist.at(i), SIGNAL(finished()), _thrlist.at(i), SLOT(quit()));
-        connect(_workerlist.at(i), SIGNAL(finished()), _workerlist.at(i), SLOT(deleteLater()));
-        connect(_thrlist.at(i), SIGNAL(finished()), _thrlist.at(i), SLOT(deleteLater()));
     }
 }
 
 NetScaner::~NetScaner()
 {
     /*TODO .. CHECK*/
-    qDeleteAll(_workerlist.begin(), _workerlist.end());
-    _workerlist.clear();
     qDeleteAll(_thrlist.begin(), _thrlist.end());
     _thrlist.clear();
+    qDeleteAll(_workerlist.begin(), _workerlist.end());
+    _workerlist.clear();
 }
 
 void NetScaner::start() {

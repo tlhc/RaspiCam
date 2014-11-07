@@ -29,14 +29,14 @@ void RaspCamMW::_extUISetUp() {
 
 void RaspCamMW::_exDataSetUp() {
     _streamurl = "";
+    ctlc = NULL;
     scan = new NetScaner();
     connect(scan, SIGNAL(routeOut(QString)), this, SLOT(recvmsg(QString)));
-    ctlc = NULL;
 }
 
 void RaspCamMW::on_btnScan_clicked() {
-    scan->start();
 
+    scan->start();
 }
 
 void RaspCamMW::on_btnStart_clicked() {
