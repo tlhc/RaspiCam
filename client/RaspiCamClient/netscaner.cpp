@@ -1,10 +1,10 @@
-#include "netscaner.h"
 #include <QNetworkAddressEntry>
-#include <QHostAddress>
 #include <QNetworkInterface>
-#include <QDebug>
-#include <QTimer>
+#include <QHostAddress>
 #include <QStringList>
+#include <QTimer>
+#include <QDebug>
+#include "netscaner.h"
 
 ScanWorker::ScanWorker(QString intfname, QHostAddress iprange, QHostAddress netmask) :
     _intfname(intfname),
@@ -14,16 +14,8 @@ ScanWorker::ScanWorker(QString intfname, QHostAddress iprange, QHostAddress netm
 
 }
 
-ScanWorker::~ScanWorker() {
-    qDebug() << Q_FUNC_INFO;
-}
-
 void ScanWorker::process() {
 
-    qDebug() << _intfname
-             << _iprange.toString()
-             << _netmask.toString()
-             << QThread::currentThreadId();
     quint32 netaddr = _iprange.toIPv4Address() & _netmask.toIPv4Address();
     quint32 wildmask = ~_netmask.toIPv4Address();
     for(quint32 address = netaddr + 1; address < netaddr + wildmask; address++) {
@@ -37,7 +29,6 @@ void ScanWorker::process() {
         _request->close();
         delete _request;
     }
-    qDebug() << QThread::currentThreadId();
     emit finished();
 }
 
@@ -55,7 +46,6 @@ NetScaner::NetScaner(QObject *parent) : QObject(parent)
         }
         QList<QNetworkAddressEntry> tmp = (*iter).addressEntries();
         QNetworkAddressEntry entry;
-        qDebug() << "network interface";
         foreach (entry, tmp) {
             if(entry.ip().protocol() == QAbstractSocket::IPv4Protocol) {
                 qDebug() << (*iter).name() << entry.ip() << entry.netmask();
@@ -84,7 +74,6 @@ NetScaner::~NetScaner()
     _workerlist.clear();
     qDeleteAll(_thrlist.begin(), _thrlist.end());
     _thrlist.clear();
-    qDebug() << Q_FUNC_INFO;
 }
 
 void NetScaner::start() {
@@ -98,7 +87,7 @@ QString NetScaner::ret() const {
 }
 
 void NetScaner::error(QString err) {
-    qDebug() << err << Q_FUNC_INFO;
+    qDebug() << Q_FUNC_INFO << err;
 }
 
 void NetScaner::getone(QString one) {

@@ -1,7 +1,7 @@
+#include <QTimer>
 #include "raspcammw.h"
 #include "ui_raspcammw.h"
 #include "tcprequest.h"
-#include <QTimer>
 
 
 RaspCamMW::RaspCamMW(QWidget *parent) :

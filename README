@@ -4,6 +4,7 @@ Server:
     Capture video use raspivid and Streaming video use vlc
 Client:
     Play video use libvlc based on Qt
+    .....
 
 before use :
     check Server(RaspiberryPi) installed these components:

@@ -20,7 +20,6 @@ private:
     QHostAddress _serveraddr;
     qint16 _port;
     TcpRequest* _request;
-
 };
 
 #endif // CONTROLCLIENT_H

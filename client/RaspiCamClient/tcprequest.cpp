@@ -1,5 +1,5 @@
-#include "tcprequest.h"
 #include <QDebug>
+#include "tcprequest.h"
 
 TcpRequest::TcpRequest(QObject *parent) :
     QObject(parent) {

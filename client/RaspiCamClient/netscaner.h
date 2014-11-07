@@ -14,7 +14,6 @@ class ScanWorker : public QObject {
     Q_OBJECT
 public:
     ScanWorker(QString intfname, QHostAddress iprange, QHostAddress netmask);
-    ~ScanWorker();
 public slots:
     void process();
 signals:
