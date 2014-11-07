@@ -1,5 +1,7 @@
 Raspiberry Pi Cam Suit inlcude server and client
 
+!!under development...
+
 Server:
     Capture video use raspivid and Streaming video use vlc
 Client:
@@ -15,3 +17,13 @@ before use :
 
     may be has other packeges or components not mentioned above you may install 
     by yourself.
+
+    Useage:
+    Server:
+        put ctlserver.py in your Rpi then
+        python ctlserver.py
+
+    Client:
+        open with Qt then run
+
+
