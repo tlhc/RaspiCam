@@ -4,6 +4,7 @@
 """ ctl server for Raspberry Pi vlc stream cam DEMO VERSION! """
 
 import os
+import sys
 import signal
 import socket
 import threading
@@ -11,6 +12,18 @@ import netifaces
 import SocketServer
 import logging
 import subprocess
+import signal
+
+
+def signal_handler(signals, frame):
+    """ handle ctrl -c """
+    _, _ = signals, frame
+    APPLOGGER.info("server exiting..")
+    if ThreadedTCPRequestHandler.vvprocess is not None:
+        if ThreadedTCPRequestHandler.vvprocess.poll() is None:
+            os.killpg(ThreadedTCPRequestHandler.vvprocess.pid,
+                      signal.SIGTERM)
+    sys.exit(0)
 
 def loggerinit():
     """ init logger """
@@ -42,6 +55,7 @@ class RaspvidCmd(object):
     """ opt the cmd str """
     def __init__(self):
         self.fps = 30
+        self.bright = 50       # 0 - 100
         self.bitrate = 4500000 # 4.5MBit/s
         self.rtsp_port = 9000
         self.width = 1280
@@ -54,6 +68,7 @@ class RaspvidCmd(object):
         vlcbase = "cvlc"
         cmdstr = ''
         cmdstr += raspvidbase + ' '
+        cmdstr += '-br ' + str(self.bright) + ' '
         cmdstr += '-w ' + str(self.width) + ' '
         cmdstr += '-h ' + str(self.height) + ' '
         cmdstr += '-b '  + str(self.bitrate) + ' '
@@ -82,14 +97,14 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
         """ start video process """
         if ThreadedTCPRequestHandler.vvprocess is None:
             self.__sub_call(self.raspcmd.cmd())
-            response = 'video process start'
-            self.request.sendall(response)
+            self.request.sendall(self.raspcmd.cmd())
+            APPLOGGER.info("video server run.")
         else:
             if ThreadedTCPRequestHandler.vvprocess.poll() is None:
                 APPLOGGER.info('already run subprocess: ' +
                                str(ThreadedTCPRequestHandler.vvprocess.pid))
-                response = 'video process already run'
-                self.request.sendall(response)
+                APPLOGGER.info("video process already run.")
+                self.request.sendall(self.raspcmd.cmd())
             else:
                 APPLOGGER.info('subprocess not running')
         APPLOGGER.info('activeCount is ' + str(threading.activeCount()))
@@ -162,6 +177,8 @@ def __get_local_ip():
     return ipaddr
 
 if __name__ == "__main__":
+
+    signal.signal(signal.SIGINT, signal_handler)
 
     LCIP = ''
     try:
