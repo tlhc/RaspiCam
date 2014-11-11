@@ -90,6 +90,8 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
         self.maxbuf = 2048
         self.maxthr = 4
         self.raspcmd = RaspvidCmd()
+        self.clientcmd_start = "start"
+        self.clientcmd_stop = "stop"
         SocketServer.BaseRequestHandler.__init__(self, request,
                                                  client_address, server)
 
@@ -104,6 +106,7 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
                 APPLOGGER.info('already run subprocess: ' +
                                str(ThreadedTCPRequestHandler.vvprocess.pid))
                 APPLOGGER.info("video process already run.")
+                self.request.sendall(self.clientcmd_start + '|' + '1')
                 self.request.sendall(self.raspcmd.cmd())
             else:
                 APPLOGGER.info('subprocess not running')
@@ -113,7 +116,7 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
         """ __stop_process """
         if ThreadedTCPRequestHandler.vvprocess is None:
             APPLOGGER.warn('no process to stop')
-            self.request.sendall('process already stop')
+            self.request.sendall(self.clientcmd_stop + '|' + '0')
             return
         if ThreadedTCPRequestHandler.vvprocess.poll() is None:
             os.killpg(ThreadedTCPRequestHandler.vvprocess.pid,
@@ -121,11 +124,11 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
             # ThreadedTCPRequestHandler.vvprocess.terminate()
             APPLOGGER.warn('terminating..')
             ThreadedTCPRequestHandler.vvprocess = None
-            self.request.sendall('terminate done') # fake done
+            self.request.sendall(self.clientcmd_stop + '|' + '1') # fake done
         else:
             APPLOGGER.info('process is terminate')
             ThreadedTCPRequestHandler.vvprocess = None
-            self.request.sendall('no process to stop')
+            self.request.sendall(self.clientcmd_stop + '|' + '0')
 
     def __sysinfo(self):
         """ for get cmd """
@@ -134,7 +137,8 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
         self.request.sendall(str(ipaddr) + ':' + str(vport))
 
     def __changevprocss(self, data):
-        """ change video process paramters """
+        """ change video process paramters
+            change|cmd1=opt, cmd2=opt2, ... """
         pass
     def __process_req(self, data):
         """ process req """
@@ -147,7 +151,7 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
             self.__stop_process()
         elif data.lower() == 'get':
             self.__sysinfo()
-        elif data.lower().startwith('change'):
+        elif data.lower().startswith('change'):
             self.__changevprocss(data)
         else:
             APPLOGGER.info('Cmd not support: ' + data)
@@ -156,8 +160,10 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
     def __sub_call(cls, cmdstr):
         """ sub_call for vv stream """
         APPLOGGER.info('subcall in porcess')
+        child = None
         child = subprocess.Popen(cmdstr, shell=True, preexec_fn=os.setsid)
-        cls.vvprocess = child
+        if child is not None:
+            cls.vvprocess = child
 
     def handle(self):
         if threading.activeCount() > self.maxthr:

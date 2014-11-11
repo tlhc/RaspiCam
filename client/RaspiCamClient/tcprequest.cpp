@@ -1,12 +1,35 @@
 #include <QDebug>
+#include <netinet/tcp.h>
+#include <netinet/in.h>
 #include "tcprequest.h"
 
-TcpRequest::TcpRequest(QObject *parent) :
+TcpRequest::TcpRequest(QObject *parent, int keep_alive) :
     QObject(parent) {
-    _socket = new QTcpSocket(this);
-    connect(_socket, SIGNAL(connected()), this, SLOT(connected()));
-    connect(_socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
-    connect(_socket, SIGNAL(readyRead()), this, SLOT(readall()));
+    if(keep_alive == 0) {
+        _socket = new QTcpSocket(this);
+        connect(_socket, SIGNAL(connected()), this, SLOT(connected()));
+        connect(_socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
+        connect(_socket, SIGNAL(readyRead()), this, SLOT(readall()));
+        connect(_socket, SIGNAL(error(QAbstractSocket::SocketError)),
+                this, SLOT(error(QAbstractSocket::SocketError)));
+        _iskeep = 0;
+    } else if(keep_alive == 1) {
+        _socket = new QTcpSocket(this);
+        connect(_socket, SIGNAL(connected()), this, SLOT(connected()));
+        connect(_socket, SIGNAL(disconnected()), this, SLOT(disconnected()));
+        connect(_socket, SIGNAL(readyRead()), this, SLOT(readall()));
+        connect(_socket, SIGNAL(stateChanged(QAbstractSocket::SocketState)),
+                this, SLOT(statuschange(QAbstractSocket::SocketState)));
+        connect(_socket, SIGNAL(error(QAbstractSocket::SocketError)),
+                this, SLOT(error(QAbstractSocket::SocketError)));
+        int maxIdle = 30; /* seconds */
+        int enableKeepAlive = 1;
+        int fd = _socket->socketDescriptor();
+        setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &enableKeepAlive, sizeof(enableKeepAlive));
+        setsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE, &maxIdle, sizeof(maxIdle));
+        _iskeep = 1;
+    }
+
 }
 
 TcpRequest::~TcpRequest() {
@@ -23,7 +46,9 @@ bool TcpRequest::connectHost(QHostAddress host, qint16 port, int timeout) {
     if(host.isNull() || host.isInSubnet(localintf)) {
         return false;
     }
-
+    if(_socket->isOpen()) {
+        _socket->abort();
+    }
     _socket->connectToHost(host, port);
     return _socket->waitForConnected(timeout);
 }
@@ -37,23 +62,62 @@ bool TcpRequest::sendData(QByteArray data) {
     return false;
 }
 
-void TcpRequest::close() {
-    /*emit disconnected signal*/
+void TcpRequest::disconnectHost() {
+    /*emit disconnected signal auto*/
     _socket->disconnectFromHost();
+}
+
+void TcpRequest::reset() {
+    _socket->abort();
+}
+
+bool TcpRequest::isconnected() {
+    if(_socket != NULL) {
+        if(_socket->state() == QAbstractSocket::ConnectedState) {
+            if(_socket->isOpen() && _socket->isReadable() && _socket->isWritable()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool TcpRequest::isprocessing() {
+    if(_socket != NULL) {
+        if(_socket->state() == QAbstractSocket::ConnectingState) {
+            return true;
+        }
+    }
+    return false;
+}
+
+int TcpRequest::status() {
+    return _socket->state();
 }
 
 
 void TcpRequest::connected() {
-    qDebug() << "connected";
+    qDebug() << "connected" << _socket->socketDescriptor();
 }
 
 void TcpRequest::disconnected() {
-    _socket->deleteLater();
-    qDebug() << "disconnected";
+    if(_iskeep == 0) {
+        _socket->deleteLater();
+    }
+    qDebug() << "disconnected" << _socket->socketDescriptor();
+
 }
 
 void TcpRequest::readall() {
     if(_socket->isReadable()) {
         emit sigmsg(_socket->readAll());
     }
+}
+
+void TcpRequest::statuschange(QAbstractSocket::SocketState status) {
+    qDebug() << Q_FUNC_INFO << status;
+}
+
+void TcpRequest::error(QAbstractSocket::SocketError error) {
+    qDebug() << Q_FUNC_INFO << error;
 }

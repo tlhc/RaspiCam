@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>714</width>
-    <height>610</height>
+    <width>887</width>
+    <height>513</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,8 +19,8 @@
      <rect>
       <x>10</x>
       <y>20</y>
-      <width>691</width>
-      <height>491</height>
+      <width>640</width>
+      <height>360</height>
      </rect>
     </property>
    </widget>
@@ -28,52 +28,13 @@
     <property name="geometry">
      <rect>
       <x>30</x>
-      <y>530</y>
+      <y>400</y>
       <width>99</width>
       <height>27</height>
      </rect>
     </property>
     <property name="text">
      <string>Scan</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btnStart">
-    <property name="geometry">
-     <rect>
-      <x>190</x>
-      <y>530</y>
-      <width>99</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>PLay</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btnStop">
-    <property name="geometry">
-     <rect>
-      <x>410</x>
-      <y>530</y>
-      <width>99</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Stop</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="btnRecord">
-    <property name="geometry">
-     <rect>
-      <x>300</x>
-      <y>530</y>
-      <width>99</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Record</string>
     </property>
    </widget>
    <widget class="QLabel" name="lbl_address">
@@ -89,13 +50,160 @@
      <string>address:</string>
     </property>
    </widget>
+   <widget class="QGroupBox" name="gp_videoparams">
+    <property name="geometry">
+     <rect>
+      <x>670</x>
+      <y>20</y>
+      <width>201</width>
+      <height>241</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Video Params</string>
+    </property>
+    <widget class="QPushButton" name="btn_confirm">
+     <property name="geometry">
+      <rect>
+       <x>80</x>
+       <y>200</y>
+       <width>99</width>
+       <height>27</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Confirm</string>
+     </property>
+    </widget>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>30</y>
+       <width>181</width>
+       <height>161</height>
+      </rect>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="lblBright">
+        <property name="text">
+         <string>Brightness:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="le_bright"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="lblfps">
+        <property name="text">
+         <string>Fps:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QLineEdit" name="le_fps"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="lblBitrate">
+        <property name="text">
+         <string>BitRate:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QLineEdit" name="le_BitRate"/>
+      </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="lblwidth">
+        <property name="text">
+         <string>width:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QLineEdit" name="le_width"/>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="lblwidth_2">
+        <property name="text">
+         <string>height:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="1">
+       <widget class="QLineEdit" name="le_height"/>
+      </item>
+     </layout>
+    </widget>
+   </widget>
+   <widget class="QGroupBox" name="gp_Controls">
+    <property name="geometry">
+     <rect>
+      <x>670</x>
+      <y>260</y>
+      <width>201</width>
+      <height>141</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Controls</string>
+    </property>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>50</y>
+       <width>178</width>
+       <height>62</height>
+      </rect>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QPushButton" name="btnStart">
+        <property name="text">
+         <string>PLay</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QPushButton" name="btnStop">
+        <property name="text">
+         <string>Stop</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QPushButton" name="btnRecord">
+        <property name="text">
+         <string>Record</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </widget>
+   <widget class="QLabel" name="lblprocess">
+    <property name="geometry">
+     <rect>
+      <x>170</x>
+      <y>405</y>
+      <width>191</width>
+      <height>17</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>714</width>
+     <width>887</width>
      <height>25</height>
     </rect>
    </property>

@@ -19,15 +19,14 @@ void ScanWorker::process() {
     quint32 netaddr = _iprange.toIPv4Address() & _netmask.toIPv4Address();
     quint32 wildmask = ~_netmask.toIPv4Address();
     for(quint32 address = netaddr + 1; address < netaddr + wildmask; address++) {
-        TcpRequest* _request = new TcpRequest(this);
-        if(_request->connectHost(QHostAddress(address), 9999, 10)) {
-            /*_request is asyn so we may not sendData here
+        TcpRequest _request;
+        if(_request.connectHost(QHostAddress(address), 9999, 10)) {
+            /*_request is async so we may not sendData here
              * thread may exit before the request return
             */
             emit getone(QHostAddress(address).toString());
         }
-        _request->close();
-        delete _request;
+        _request.disconnectHost();
     }
     emit finished();
 }
@@ -68,10 +67,11 @@ NetScaner::NetScaner(QObject *parent) : QObject(parent)
 NetScaner::~NetScaner()
 {
     /*TODO .. CHECK*/
-    qDeleteAll(_thrlist.begin(), _thrlist.end());
-    _thrlist.clear();
     qDeleteAll(_workerlist.begin(), _workerlist.end());
     _workerlist.clear();
+
+    qDeleteAll(_thrlist.begin(), _thrlist.end());
+    _thrlist.clear();
 }
 
 void NetScaner::start() {

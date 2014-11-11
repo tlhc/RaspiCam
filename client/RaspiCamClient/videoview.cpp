@@ -9,9 +9,9 @@ static const char* vlcArguments[] = {
     "--no-snapshot-preview",
     "--no-stats",
     "--no-audio",
-    "--no-video-title-show",
-    "-vvv"
+    "--no-video-title-show"
 };
+//"-vvv"
 
 VideoView::VideoView(QWidget *parent) :
     QWidget(parent),
@@ -27,6 +27,10 @@ VideoView::VideoView(QWidget *parent) :
 }
 
 VideoView::~VideoView() {
+    if(_vlcMediaPlayer) {
+        libvlc_media_player_stop(_vlcMediaPlayer);
+        libvlc_media_player_release(_vlcMediaPlayer);
+    }
     libvlc_release(_vlcInstance);
 }
 
