@@ -6,29 +6,29 @@ RaspiCam can be used to capture(server) and play(client) video
 
 Hardware:
 
-    -RaspiberryPi B+
-    -[RPi-Camera-F](http://www.waveshare.net/shop/RPi-Camera-F.htm)
+ - RaspiberryPi B+
+ - [RPi-Camera-F](http://www.waveshare.net/shop/RPi-Camera-F.htm)
     
 Software:
 
-    -Server(written in python, runs on raspbian)
-    -Client(written in c++(Qt), runs on ubuntu)
+ - Server(written in python, runs on raspbian)
+ - Client(written in c++(Qt), runs on ubuntu)
 
 ###!!still under development...
 
 ###Server:
 
-    (Capture video use raspivid and Streaming video use vlc)
-    -support start, stop video streaming control
-    -support remote change video streaming parameters(brightness, fps, bitrate, video width, video height...)
-    -support auto discovery
+ - (Capture video use raspivid and Streaming video use vlc)
+ - support start, stop video streaming control
+ - support remote change video streaming parameters(brightness, fps, bitrate, video width, video height...)
+ - support auto discovery
     
 ###Client:
 
-    (Play video use libvlc based on Qt)
-    -support auto discovery Rpi(just push scan button)
-    -support start, stop control
-    -support remote change Rpi video streaming parameters(brightness, fps, bitrate, video width, video height...)
+ - (Play video use libvlc based on Qt)
+ - support auto discovery Rpi(just push scan button)
+ - support start, stop control
+ - support remote change Rpi video streaming parameters(brightness, fps, bitrate, video width, video height...)
 
 
 ##Installation
@@ -46,9 +46,12 @@ Software:
 ##Useage:
 
     Server:
-        -put ctlserver.py in your Rpi then
-        -python ctlserver.py
+
+    - put ctlserver.py in your Rpi then
+    - python ctlserver.py
 
     Client:
-        -open with Qt then compile and run
+
+    - open with Qt then compile and run
+
 
