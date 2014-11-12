@@ -6,6 +6,7 @@ Hardware:
 
     - RaspiberryPi B+
     - [RPi-Camera-F](http://www.waveshare.net/shop/RPi-Camera-F.htm)
+    
 Software:
 
     - Server(written in python, runs on raspbian)
