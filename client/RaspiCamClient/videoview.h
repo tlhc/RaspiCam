@@ -13,8 +13,6 @@ public:
     void start();
     void stop();
 
-    void takeSnapshot(const QString& filePath);
-
     void startRecording(const QString& filePath);
     void stopRecording();
     bool isRecording() const { return _recording; }

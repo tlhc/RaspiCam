@@ -1,4 +1,5 @@
 #include "videoview.h"
+#include <QDebug>
 
 static const char* vlcArguments[] = {
     "--intf=dummy",
@@ -48,10 +49,11 @@ void VideoView::start() {
         const char* recordingOptionPattern =
                 "sout=#duplicate{"
                     "dst=display,"
-                    "dst='transcode{vcodec=theo,vb=1800,acodec=vorb,ab=128}:standard{access=file,dst=%1}'"
+                    "dst='transcode{vcodec=h264}:standard{access=file,mux=mp4,dst=%1}'"
                 "}";
 
         QString recordingOption = QString(recordingOptionPattern).arg(_recordingFilePath);
+
         libvlc_media_add_option(vlcMedia, recordingOption.toUtf8().constData());
         libvlc_media_add_option(vlcMedia, "v4l2-caching=100");
     }
@@ -75,17 +77,10 @@ void VideoView::start() {
 
 void VideoView::stop() {
     Q_ASSERT(_vlcMediaPlayer);
-
     libvlc_media_player_stop(_vlcMediaPlayer);
     libvlc_media_player_release(_vlcMediaPlayer);
     _vlcMediaPlayer = 0;
     _start = false;
-}
-
-void VideoView::takeSnapshot(const QString &filePath) {
-    Q_ASSERT(_vlcMediaPlayer);
-
-    libvlc_video_take_snapshot(_vlcMediaPlayer, 0, filePath.toUtf8().constData(), 0, 0);
 }
 
 void VideoView::startRecording(const QString &filePath) {

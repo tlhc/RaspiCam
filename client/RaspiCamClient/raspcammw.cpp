@@ -124,8 +124,11 @@ void RaspCamMW::on_btnStop_clicked() {
 
 
 void RaspCamMW::on_btnRecord_clicked() {
+    if(!_vview->isStart()) {
+        return;
+    }
     if(!_vview->isRecording()) {
-        _vview->startRecording("./recordfile");
+        _vview->startRecording("./recordfile.mp4");
         ui->btnRecord->setText("Stop Record");
     } else {
         _vview->stopRecording();

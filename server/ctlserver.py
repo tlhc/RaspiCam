@@ -140,7 +140,7 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
             change|cmd1=opt, cmd2=opt2, ... """
         data = data.lstrip('change|')
         data = data.split(',')
-        APPLOGGER.info(data)
+        APPLOGGER.debug(data)
         paradict = {}
         for item in data:
             if item == '':
