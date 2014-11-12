@@ -58,3 +58,6 @@ Software:
 
     - open with Qt then compile and run
 
+
+
+    sorry for my poor english
