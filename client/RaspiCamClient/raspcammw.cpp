@@ -26,11 +26,9 @@ RaspCamMW::~RaspCamMW()
     if(ctlc != NULL) {
         delete ctlc;
     }
-
     if(scan != NULL) {
         delete scan;
     }
-
 }
 
 void RaspCamMW::_extUISetUp() {
