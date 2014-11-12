@@ -211,5 +211,12 @@ void RaspCamMW::drawprocess() {
 
 void RaspCamMW::on_btn_confirm_clicked() {
     ctlc->change(_collectcmd());
+    if(_vview->isStart()) {
+        _vview->stop();
+    }
+    _vview->setWeburl(_streamurl);
+    _processtimer.start();
+    _processtime.restart();
+    QTimer::singleShot(_cntdown_msec, this, SLOT(laterstart()));
 }
 

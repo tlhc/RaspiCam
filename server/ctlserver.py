@@ -12,7 +12,6 @@ import netifaces
 import SocketServer
 import logging
 import subprocess
-import signal
 
 
 def signal_handler(signals, frame):
@@ -139,7 +138,37 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
     def __changevprocss(self, data):
         """ change video process paramters
             change|cmd1=opt, cmd2=opt2, ... """
-        pass
+        data = data.lstrip('change|')
+        data = data.split(',')
+        APPLOGGER.info(data)
+        paradict = {}
+        for item in data:
+            if item == '':
+                continue
+            key, val = item.split('=')
+            paradict[key] = val
+
+        if 'brightness' in paradict:
+            self.raspcmd.bright = int(paradict['brightness'])
+        if 'bitrate' in paradict:
+            self.raspcmd.bitrate = int(paradict['bitrate'])
+        if 'fps' in paradict:
+            self.raspcmd.fps = int(paradict['fps'])
+        if 'height' in paradict:
+            self.raspcmd.height = int(paradict['height'])
+        if 'width' in paradict:
+            self.raspcmd.width = int(paradict['width'])
+        if ThreadedTCPRequestHandler.vvprocess is None:
+            self.__sub_call(self.raspcmd.cmd())
+            return
+        if ThreadedTCPRequestHandler.vvprocess.poll() is None:
+            os.killpg(ThreadedTCPRequestHandler.vvprocess.pid,
+                      signal.SIGTERM)
+            ThreadedTCPRequestHandler.vvprocess = None
+            self.__sub_call(self.raspcmd.cmd())
+        else:
+            self.__sub_call(self.raspcmd.cmd())
+
     def __process_req(self, data):
         """ process req """
         data = data.strip(' \n')
