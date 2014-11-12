@@ -57,6 +57,13 @@ Software:
     Client:
 
     - open with Qt then compile and run
+    - (or) 
+
+        ```
+          - cd RaspiCamClient
+          - qmake
+          - make
+        ```
 
 
 
