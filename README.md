@@ -4,13 +4,13 @@ RaspiCam can be used to capture(server) and play(client) video
 
 Hardware:
 
-    - RaspiberryPi B+
-    - [RPi-Camera-F](http://www.waveshare.net/shop/RPi-Camera-F.htm)
+    -RaspiberryPi B+
+    -[RPi-Camera-F](http://www.waveshare.net/shop/RPi-Camera-F.htm)
     
 Software:
 
-    - Server(written in python, runs on raspbian)
-    - Client(written in c++(Qt), runs on ubuntu)
+    -Server(written in python, runs on raspbian)
+    -Client(written in c++(Qt), runs on ubuntu)
 
 ###!!still under development...
 
