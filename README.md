@@ -17,7 +17,7 @@ Software:
 ###!!still under development...
 
     depends on libvlc: libvlc may support Qt5 as well, but on my ubuntu, many
-    software depends on libGuiQt4 so I tend not to remove libGuiQt4 or modify $PATH(may have effect)
+    software depends on libGuiQt4.so I tend not to remove libGuiQt4 or modify $PATH(may have effect)
     so if you want use Qt5 with libvlc , just do it . ^V^
 
 ###Server:
