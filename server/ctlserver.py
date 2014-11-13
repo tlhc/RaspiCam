@@ -17,11 +17,18 @@ import subprocess
 def signal_handler(signals, frame):
     """ handle ctrl -c """
     _, _ = signals, frame
-    APPLOGGER.info("server exiting..")
-    if ThreadedTCPRequestHandler.vvprocess is not None:
-        if ThreadedTCPRequestHandler.vvprocess.poll() is None:
-            os.killpg(ThreadedTCPRequestHandler.vvprocess.pid,
-                      signal.SIGTERM)
+    APPLOGGER.info('server exiting..')
+    ThreadedTCPRequestHandler.process_lock.acquire()
+    try:
+        if ThreadedTCPRequestHandler.vvprocess is not None:
+            if ThreadedTCPRequestHandler.vvprocess.poll() is None:
+                os.killpg(ThreadedTCPRequestHandler.vvprocess.pid,
+                          signal.SIGTERM)
+    finally:
+        ThreadedTCPRequestHandler.process_lock.release()
+
+    SERVER.shutdown()
+    APPLOGGER.info('shutdown complete')
     sys.exit(0)
 
 def loggerinit():
@@ -59,7 +66,7 @@ class RaspvidCmd(object):
         self.rtsp_port = 9000
         self.width = 1280
         self.height = 720
-        self.stime = 0
+        self.stime = 0         # forever
 
     def cmd(self):
         """ return cmd str """
@@ -85,6 +92,7 @@ class RaspvidCmd(object):
 class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
     """ TCPServer RequestHandler """
     vvprocess = None
+    process_lock = threading.Lock()
     def __init__(self, request, client_address, server):
         self.maxbuf = 2048
         self.maxthr = 4
@@ -94,40 +102,55 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
         SocketServer.BaseRequestHandler.__init__(self, request,
                                                  client_address, server)
 
+    def handle(self):
+        if threading.activeCount() > self.maxthr:
+            APPLOGGER.warn('theading number exceeded')
+            return
+        data = self.request.recv(self.maxbuf)
+        self.__process_req(data)
+
     def __start_process(self):
         """ start video process """
-        if ThreadedTCPRequestHandler.vvprocess is None:
-            self.__sub_call(self.raspcmd.cmd())
-            self.request.sendall(self.raspcmd.cmd())
-            APPLOGGER.info("video server run.")
-        else:
-            if ThreadedTCPRequestHandler.vvprocess.poll() is None:
-                APPLOGGER.info('already run subprocess: ' +
-                               str(ThreadedTCPRequestHandler.vvprocess.pid))
-                APPLOGGER.info("video process already run.")
-                self.request.sendall(self.clientcmd_start + '|' + '1')
+        ThreadedTCPRequestHandler.process_lock.acquire()
+        try:
+            if ThreadedTCPRequestHandler.vvprocess is None:
+                self.__sub_call(self.raspcmd.cmd())
                 self.request.sendall(self.raspcmd.cmd())
+                APPLOGGER.info("video server run.")
             else:
-                APPLOGGER.info('subprocess not running')
-        APPLOGGER.info('activeCount is ' + str(threading.activeCount()))
+                if ThreadedTCPRequestHandler.vvprocess.poll() is None:
+                    APPLOGGER.info('already run subprocess: ' +
+                                   str(ThreadedTCPRequestHandler.vvprocess.pid))
+                    APPLOGGER.info("video process already run.")
+                    self.request.sendall(self.clientcmd_start + '|' + '1')
+                    self.request.sendall(self.raspcmd.cmd())
+                else:
+                    APPLOGGER.info('subprocess not running')
+            APPLOGGER.info('activeCount is ' + str(threading.activeCount()))
+        finally:
+            ThreadedTCPRequestHandler.process_lock.release()
 
     def __stop_process(self):
         """ __stop_process """
-        if ThreadedTCPRequestHandler.vvprocess is None:
-            APPLOGGER.warn('no process to stop')
-            self.request.sendall(self.clientcmd_stop + '|' + '0')
-            return
-        if ThreadedTCPRequestHandler.vvprocess.poll() is None:
-            os.killpg(ThreadedTCPRequestHandler.vvprocess.pid,
-                      signal.SIGTERM)
-            # ThreadedTCPRequestHandler.vvprocess.terminate()
-            APPLOGGER.warn('terminating..')
-            ThreadedTCPRequestHandler.vvprocess = None
-            self.request.sendall(self.clientcmd_stop + '|' + '1') # fake done
-        else:
-            APPLOGGER.info('process is terminate')
-            ThreadedTCPRequestHandler.vvprocess = None
-            self.request.sendall(self.clientcmd_stop + '|' + '0')
+        ThreadedTCPRequestHandler.process_lock.acquire()
+        try:
+            if ThreadedTCPRequestHandler.vvprocess is None:
+                APPLOGGER.warn('no process to stop')
+                self.request.sendall(self.clientcmd_stop + '|' + '0')
+                return
+            if ThreadedTCPRequestHandler.vvprocess.poll() is None:
+                os.killpg(ThreadedTCPRequestHandler.vvprocess.pid,
+                          signal.SIGTERM)
+                # ThreadedTCPRequestHandler.vvprocess.terminate()
+                APPLOGGER.warn('terminating..')
+                ThreadedTCPRequestHandler.vvprocess = None
+                self.request.sendall(self.clientcmd_stop + '|' + '1') # fake done
+            else:
+                APPLOGGER.info('process is terminate')
+                ThreadedTCPRequestHandler.vvprocess = None
+                self.request.sendall(self.clientcmd_stop + '|' + '0')
+        finally:
+            ThreadedTCPRequestHandler.process_lock.release()
 
     def __sysinfo(self):
         """ for get cmd """
@@ -158,16 +181,20 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
             self.raspcmd.height = int(paradict['height'])
         if 'width' in paradict:
             self.raspcmd.width = int(paradict['width'])
-        if ThreadedTCPRequestHandler.vvprocess is None:
-            self.__sub_call(self.raspcmd.cmd())
-            return
-        if ThreadedTCPRequestHandler.vvprocess.poll() is None:
-            os.killpg(ThreadedTCPRequestHandler.vvprocess.pid,
-                      signal.SIGTERM)
-            ThreadedTCPRequestHandler.vvprocess = None
-            self.__sub_call(self.raspcmd.cmd())
-        else:
-            self.__sub_call(self.raspcmd.cmd())
+        ThreadedTCPRequestHandler.process_lock.acquire()
+        try:
+            if ThreadedTCPRequestHandler.vvprocess is None:
+                self.__sub_call(self.raspcmd.cmd())
+                return
+            if ThreadedTCPRequestHandler.vvprocess.poll() is None:
+                os.killpg(ThreadedTCPRequestHandler.vvprocess.pid,
+                          signal.SIGTERM)
+                ThreadedTCPRequestHandler.vvprocess = None
+                self.__sub_call(self.raspcmd.cmd())
+            else:
+                self.__sub_call(self.raspcmd.cmd())
+        finally:
+            ThreadedTCPRequestHandler.process_lock.release()
 
     def __process_req(self, data):
         """ process req """
@@ -194,12 +221,7 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
         if child is not None:
             cls.vvprocess = child
 
-    def handle(self):
-        if threading.activeCount() > self.maxthr:
-            APPLOGGER.warn('theading number exceeded')
-            return
-        data = self.request.recv(self.maxbuf)
-        self.__process_req(data)
+
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     """ TCPServer """
