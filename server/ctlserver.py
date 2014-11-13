@@ -165,11 +165,13 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
         data = data.split(',')
         APPLOGGER.debug(data)
         paradict = {}
-        for item in data:
-            if item == '':
-                continue
-            key, val = item.split('=')
-            paradict[key] = val
+        try:
+            paradict = dict([item.split('=') for item in data if item != ''])
+            if not paradict:
+                raise AppException('paradict dict is empty')
+        except AppException as ex:
+            APPLOGGER.error(ex)
+            return
 
         if 'brightness' in paradict:
             self.raspcmd.bright = int(paradict['brightness'])
@@ -181,6 +183,7 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
             self.raspcmd.height = int(paradict['height'])
         if 'width' in paradict:
             self.raspcmd.width = int(paradict['width'])
+
         ThreadedTCPRequestHandler.process_lock.acquire()
         try:
             if ThreadedTCPRequestHandler.vvprocess is None:
