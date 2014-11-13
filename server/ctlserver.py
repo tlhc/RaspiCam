@@ -250,7 +250,7 @@ if __name__ == "__main__":
         SERVER = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
     except socket.error as ex:
         APPLOGGER.error(ex)
-        exit(-1)
+        sys.exit(1)
 
     IP, PORT = SERVER.server_address
     SERVER_THR = threading.Thread(target=SERVER.serve_forever)
