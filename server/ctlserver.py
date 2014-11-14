@@ -27,7 +27,6 @@ def signal_handler(signals, frame):
     finally:
         ThreadedTCPRequestHandler.process_lock.release()
 
-    SERVER.shutdown()
     APPLOGGER.info('shutdown complete')
     sys.exit(0)
 
@@ -224,8 +223,6 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
         if child is not None:
             cls.vvprocess = child
 
-
-
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     """ TCPServer """
     pass
@@ -236,29 +233,29 @@ def __get_local_ip():
     ipaddr = netifaces.ifaddresses('eth0')[netifaces.AF_INET][0]['addr']
     return ipaddr
 
-if __name__ == "__main__":
-
-    signal.signal(signal.SIGINT, signal_handler)
-
-    LCIP = ''
+def tcpserve():
+    """ tcpserve """
+    ipaddr = ''
     try:
-        LCIP = __get_local_ip()
-        if LCIP is '':
+        ipaddr = __get_local_ip()
+        if ipaddr is '':
             raise AppException('get local ip exp')
     except AppException as ex:
         APPLOGGER.error(ex)
 
-    HOST, PORT = LCIP, 9999
+    host, port = ipaddr, 9999
+    server = None
     try:
-        SERVER = ThreadedTCPServer((HOST, PORT), ThreadedTCPRequestHandler)
+        server = ThreadedTCPServer((host, port), ThreadedTCPRequestHandler)
     except socket.error as ex:
         APPLOGGER.error(ex)
         sys.exit(1)
-
-    IP, PORT = SERVER.server_address
-    SERVER_THR = threading.Thread(target=SERVER.serve_forever)
-    # Exit the server thread when the main thread terminates
-    SERVER_THR.daemon = True
-    SERVER_THR.start()
     APPLOGGER.info('Server Up')
-    SERVER.serve_forever()
+    if server:
+        server.serve_forever()
+    else:
+        raise AppException('server start err')
+
+if __name__ == "__main__":
+    signal.signal(signal.SIGINT, signal_handler)
+    tcpserve()
