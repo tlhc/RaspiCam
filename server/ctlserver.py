@@ -263,15 +263,6 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
         else:
             APPLOGGER.info('Cmd not support: ' + data)
 
-    @classmethod
-    def __sub_call(cls, cmdstr):
-        """ sub_call for vv stream """
-        APPLOGGER.info('subcall in porcess')
-        child = None
-        child = subprocess.Popen(cmdstr, shell=True, preexec_fn=os.setsid)
-        if child is not None:
-            cls.vvprocess = child
-
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     """ TCPServer """
     allow_reuse_address = True
@@ -308,6 +299,10 @@ def tcpserve(ipaddr, serve_port):
 
 class HttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     """ HttpHandler for GET and POST """
+    def __init__(self, request, client_address, server):
+        self.vvmng = VideoProcessMng()
+        BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, request,
+                                                       client_address, server)
     def do_GET(self):
         """ GET """
         if self.path == "/":
@@ -354,16 +349,19 @@ class HttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                                 headers=self.headers,
                                 environ=_environ)
         if self.path == "/start":
+            # TODO add start
             APPLOGGER.debug(str(form))
             self.send_response(200)
             self.end_headers()
             return
         elif self.path == '/stop':
+            # TODO add stop
             APPLOGGER.debug(str(form))
             self.send_response(200)
             self.end_headers()
             return
         elif self.path == '/change':
+            # TODO add change
             APPLOGGER.debug(str(form))
             self.send_response(200)
             self.end_headers()
