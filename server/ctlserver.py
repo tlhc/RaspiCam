@@ -47,7 +47,7 @@ def loggerinit():
     return _logger
 
 APPLOGGER = loggerinit()
-APPLOGGER.setLevel('INFO')
+APPLOGGER.setLevel('DEBUG')
 
 class AppException(Exception):
     """ AppException """
@@ -303,6 +303,12 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.vvpmng = VideoProcessMng()
         BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, request,
                                                        client_address, server)
+    def __sendmsg(self, code, msg):
+        """ send msg to client """
+        self.send_response(code)
+        self.send_header('Content-type', 'text/html')
+        self.end_headers()
+        self.wfile.write(msg)
     def do_GET(self):
         """ GET """
         if self.path == "/":
@@ -346,16 +352,14 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         try:
             if not self.vvpmng.isset():
                 self.vvpmng.start()
-                self.send_response(200)
-                self.send_header('Content-type', 'text/html')
-                self.end_headers()
-                self.wfile.write(self.vvpmng.process_cmd.cmd())
+                self.__sendmsg(200, self.vvpmng.process_cmd.cmd())
                 APPLOGGER.info("video server run.")
             else:
                 if self.vvpmng.isrun():
                     APPLOGGER.info('already run subprocess: ' +
                                    str(self.vvpmng.pid()))
                     APPLOGGER.info("video process already run.")
+                    self.__sendmsg(200, 'already run')
                 else:
                     APPLOGGER.info('subprocess not running')
             APPLOGGER.info('activeCount is ' + str(threading.activeCount()))
@@ -368,23 +372,17 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         try:
             if not self.vvpmng.isset():
                 APPLOGGER.warn('no process to stop')
-                self.send_response(200)
-                self.send_header('Content-type', 'text/html')
-                self.end_headers()
+                self.__sendmsg(200, 'no process to stop')
                 return # jump to finally
             if self.vvpmng.isrun():
                 self.vvpmng.stop()
                 APPLOGGER.warn('terminating..')
                 self.vvpmng.setprocess(None)
-                self.send_response(200)
-                self.send_header('Content-type', 'text/html')
-                self.end_headers()
+                self.__sendmsg(200, 'terminating..')
             else:
                 APPLOGGER.info('process is terminate')
                 self.vvpmng.setprocess(None)
-                self.send_response(200)
-                self.send_header('Content-type', 'text/html')
-                self.end_headers()
+                self.__sendmsg(200, 'process is terminated')
         finally:
             self.vvpmng.releaselock()
 
@@ -421,6 +419,7 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                     setpara('para_height', form, self.vvpmng.process_cmd.height)
 
             APPLOGGER.debug(self.vvpmng.process_cmd.cmd())
+            self.__sendmsg(200, self.vvpmng.process_cmd.cmd())
 
             if not self.vvpmng.isset():
                 self.vvpmng.start()
@@ -443,16 +442,13 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                                 headers=self.headers,
                                 environ=_environ)
         if self.path == "/start":
-            APPLOGGER.debug(str(form))
             self.__start_process()
             return
         elif self.path == '/stop':
-            APPLOGGER.debug(str(form))
             self.__stop_process()
             return
         elif self.path == '/change':
             # TODO add change
-            APPLOGGER.debug(str(form))
             self.__changevprocss(form)
             return
         else:

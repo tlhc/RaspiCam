@@ -26,6 +26,7 @@ Software:
  - support start, stop video streaming control
  - support remote change video streaming parameters(brightness, fps, bitrate, video width, video height...)
  - support auto discovery
+ - support web access(control)
     
 ###Client:
 
@@ -51,7 +52,7 @@ Software:
 
     Server:
 
-    - put ctlserver.py in your Rpi then
+    - put ctlserver.py and index.html in your Rpi(one folder) then
     - python ctlserver.py
 
     Client:
