@@ -20,14 +20,14 @@ def signal_handler(signals, frame):
     """ handle ctrl -c """
     _, _ = signals, frame
     APPLOGGER.info('server exiting..')
-    vvmng = VideoProcessMng()
-    vvmng.getlock()
+    vvpmng = VideoProcessMng()
+    vvpmng.getlock()
     try:
-        if vvmng.isset():
-            if vvmng.isrun():
-                os.killpg(vvmng.pid(), signal.SIGTERM)
+        if vvpmng.isset():
+            if vvpmng.isrun():
+                os.killpg(vvpmng.pid(), signal.SIGTERM)
     finally:
-        vvmng.releaselock()
+        vvpmng.releaselock()
 
     APPLOGGER.info('shutdown complete')
     sys.exit(0)
@@ -145,7 +145,7 @@ class VideoProcessMng(object):
             APPLOGGER.info('send video process stoped signal')
 
 
-class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
+class TcpCtlHandler(SocketServer.BaseRequestHandler):
     """ TCPServer RequestHandler """
     def __init__(self, request, client_address, server):
         self.maxbuf = 2048
@@ -188,7 +188,7 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
             if not self.vvpmng.isset():
                 APPLOGGER.warn('no process to stop')
                 self.request.sendall(self.clientcmd_stop + '|' + '0')
-                return
+                return #just jump to finally
             if self.vvpmng.isrun():
                 self.vvpmng.stop()
                 APPLOGGER.warn('terminating..')
@@ -263,7 +263,7 @@ class ThreadedTCPRequestHandler(SocketServer.BaseRequestHandler):
         else:
             APPLOGGER.info('Cmd not support: ' + data)
 
-class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
+class TcpCtlServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     """ TCPServer """
     allow_reuse_address = True
 
@@ -286,7 +286,7 @@ def tcpserve(ipaddr, serve_port):
     host, port = ipaddr, int(serve_port)
     server = None
     try:
-        server = ThreadedTCPServer((host, port), ThreadedTCPRequestHandler)
+        server = TcpCtlServer((host, port), TcpCtlHandler)
     except socket.error as ex:
         APPLOGGER.error(ex)
         sys.exit(1)
@@ -297,10 +297,10 @@ def tcpserve(ipaddr, serve_port):
         raise AppException('server start err')
 
 
-class HttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     """ HttpHandler for GET and POST """
     def __init__(self, request, client_address, server):
-        self.vvmng = VideoProcessMng()
+        self.vvpmng = VideoProcessMng()
         BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, request,
                                                        client_address, server)
     def do_GET(self):
@@ -340,6 +340,100 @@ class HttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         except IOError:
             self.send_error(404, 'File Not Found: %s' % self.path)
 
+    def __start_process(self):
+        """ start the video process """
+        self.vvpmng.getlock()
+        try:
+            if not self.vvpmng.isset():
+                self.vvpmng.start()
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+                self.wfile.write(self.vvpmng.process_cmd.cmd())
+                APPLOGGER.info("video server run.")
+            else:
+                if self.vvpmng.isrun():
+                    APPLOGGER.info('already run subprocess: ' +
+                                   str(self.vvpmng.pid()))
+                    APPLOGGER.info("video process already run.")
+                else:
+                    APPLOGGER.info('subprocess not running')
+            APPLOGGER.info('activeCount is ' + str(threading.activeCount()))
+        finally:
+            self.vvpmng.releaselock()
+
+    def __stop_process(self):
+        """ stop the video process """
+        self.vvpmng.getlock()
+        try:
+            if not self.vvpmng.isset():
+                APPLOGGER.warn('no process to stop')
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+                return # jump to finally
+            if self.vvpmng.isrun():
+                self.vvpmng.stop()
+                APPLOGGER.warn('terminating..')
+                self.vvpmng.setprocess(None)
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+            else:
+                APPLOGGER.info('process is terminate')
+                self.vvpmng.setprocess(None)
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+        finally:
+            self.vvpmng.releaselock()
+
+    def __changevprocss(self, form):
+        """ change video process params """
+        self.vvpmng.getlock()
+        try:
+            def getvalue(src):
+                """ set value """
+                retval = -1
+                try:
+                    retval = int(src)
+                except ValueError as ex:
+                    APPLOGGER.warn(ex)
+                return retval
+            def setpara(key, form, dst):
+                """ set params """
+                if key in form.keys():
+                    tmpval = -1
+                    tmpval = getvalue(form[key].value)
+                    if tmpval != -1:
+                        dst = tmpval
+                return dst
+
+            self.vvpmng.process_cmd.bright = \
+                    setpara('para_bright', form, self.vvpmng.process_cmd.bright)
+            self.vvpmng.process_cmd.fps = \
+                    setpara('para_fps', form, self.vvpmng.process_cmd.fps)
+            self.vvpmng.process_cmd.bitrate = \
+                    setpara('para_bitrate', form, self.vvpmng.process_cmd.bitrate)
+            self.vvpmng.process_cmd.width = \
+                    setpara('para_width', form, self.vvpmng.process_cmd.width)
+            self.vvpmng.process_cmd.height = \
+                    setpara('para_height', form, self.vvpmng.process_cmd.height)
+
+            APPLOGGER.debug(self.vvpmng.process_cmd.cmd())
+
+            if not self.vvpmng.isset():
+                self.vvpmng.start()
+                return
+            if self.vvpmng.isrun():
+                self.vvpmng.stop()
+                self.vvpmng.setprocess(None)
+                self.vvpmng.start()
+            else:
+                self.vvpmng.start()
+        finally:
+            self.vvpmng.releaselock()
+
     def do_POST(self):
         """ POST """
         APPLOGGER.debug(self.path)
@@ -349,22 +443,17 @@ class HttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
                                 headers=self.headers,
                                 environ=_environ)
         if self.path == "/start":
-            # TODO add start
             APPLOGGER.debug(str(form))
-            self.send_response(200)
-            self.end_headers()
+            self.__start_process()
             return
         elif self.path == '/stop':
-            # TODO add stop
             APPLOGGER.debug(str(form))
-            self.send_response(200)
-            self.end_headers()
+            self.__stop_process()
             return
         elif self.path == '/change':
             # TODO add change
             APPLOGGER.debug(str(form))
-            self.send_response(200)
-            self.end_headers()
+            self.__changevprocss(form)
             return
         else:
             APPLOGGER.debug(str(form))
@@ -373,8 +462,7 @@ class HttpHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             return
 
 
-class ThreadedHTTPServer(SocketServer.ThreadingMixIn,
-                         BaseHTTPServer.HTTPServer):
+class HttpCtlServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
     """ ThreadedHTTPServer """
     allow_reuse_address = True
 
@@ -391,7 +479,7 @@ def httpserve(ipaddr, serve_port):
     APPLOGGER.info('Server Up IP=%s PORT=%s', ipaddr, serve_port)
     server = None
     try:
-        server = ThreadedHTTPServer((ipaddr, serve_port), HttpHandler)
+        server = HttpCtlServer((ipaddr, serve_port), HttpCtlHandler)
     except socket.error as ex:
         APPLOGGER.error(ex)
         sys.exit(1)
@@ -423,7 +511,7 @@ class HybirdServer(object):
         self.__preserve()
         for item in self.thrlist:
             item.start()
-        # not block join
+        # not block join ?
         while 1:
             for item in self.thrlist:
                 if item is not None and item.isAlive():
