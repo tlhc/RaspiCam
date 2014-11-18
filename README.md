@@ -4,6 +4,9 @@ RaspiCam can be used to capture(server) and play(client) video
 
 ![screen:](https://raw.githubusercontent.com/tlhc/RaspiCam/master/client/pics/demo_client.png)
 
+
+![screen-web:](https://raw.githubusercontent.com/tlhc/RaspiCam/master/client/pics/web.png)
+
 Hardware:
 
  - RaspiberryPi B+
