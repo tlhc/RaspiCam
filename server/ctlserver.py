@@ -71,8 +71,8 @@ class RaspvidCmd(object):
 
     def cmd(self):
         """ return cmd str """
-        raspvidbase = "raspivid"
-        vlcbase = "cvlc"
+        raspvidbase = 'raspivid'
+        vlcbase = 'cvlc'
         cmdstr = ''
         cmdstr += raspvidbase + ' '
         cmdstr += '-br ' + str(self.bright) + ' '
@@ -150,8 +150,8 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
     def __init__(self, request, client_address, server):
         self.maxbuf = 2048
         self.vvpmng = VideoProcessMng()
-        self.clientcmd_start = "start"
-        self.clientcmd_stop = "stop"
+        self.clientcmd_start = 'start'
+        self.clientcmd_stop = 'stop'
         SocketServer.BaseRequestHandler.__init__(self, request,
                                                  client_address, server)
 
@@ -167,12 +167,12 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
             if not self.vvpmng.isset():
                 self.vvpmng.start()
                 self.request.sendall(self.vvpmng.process_cmd.cmd())
-                APPLOGGER.info("video server run.")
+                APPLOGGER.info('video server run.')
             else:
                 if self.vvpmng.isrun():
                     APPLOGGER.info('already run subprocess: ' +
                                    str(self.vvpmng.pid()))
-                    APPLOGGER.info("video process already run.")
+                    APPLOGGER.info('video process already run.')
                     self.request.sendall(self.clientcmd_start + '|' + '1')
                     self.request.sendall(self.vvpmng.process_cmd.cmd())
                 else:
@@ -311,25 +311,25 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.wfile.write(msg)
     def do_GET(self):
         """ GET """
-        if self.path == "/":
-            self.path = "/index.html"
+        if self.path == '/':
+            self.path = '/index.html'
         try:
             # Check the file extension required and
             # set the right mime type
             sendreply = False
-            if self.path.endswith(".html"):
+            if self.path.endswith('.html'):
                 mimetype = 'text/html'
                 sendreply = True
-            if self.path.endswith(".jpg"):
+            if self.path.endswith('.jpg'):
                 mimetype = 'image/jpg'
                 sendreply = True
-            if self.path.endswith(".gif"):
+            if self.path.endswith('.gif'):
                 mimetype = 'image/gif'
                 sendreply = True
-            if self.path.endswith(".js"):
+            if self.path.endswith('.js'):
                 mimetype = 'application/javascript'
                 sendreply = True
-            if self.path.endswith(".css"):
+            if self.path.endswith('.css'):
                 mimetype = 'text/css'
                 sendreply = True
 
@@ -353,12 +353,12 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             if not self.vvpmng.isset():
                 self.vvpmng.start()
                 self.__sendmsg(200, self.vvpmng.process_cmd.cmd())
-                APPLOGGER.info("video server run.")
+                APPLOGGER.info('video server run.')
             else:
                 if self.vvpmng.isrun():
                     APPLOGGER.info('already run subprocess: ' +
                                    str(self.vvpmng.pid()))
-                    APPLOGGER.info("video process already run.")
+                    APPLOGGER.info('video process already run.')
                     self.__sendmsg(200, 'already run')
                 else:
                     APPLOGGER.info('subprocess not running')
@@ -441,7 +441,7 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         form = cgi.FieldStorage(fp=self.rfile,
                                 headers=self.headers,
                                 environ=_environ)
-        if self.path == "/start":
+        if self.path == '/start':
             self.__start_process()
             return
         elif self.path == '/stop':
@@ -531,6 +531,6 @@ def main():
     except AppException as ex:
         APPLOGGER.error(ex)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
     main()
