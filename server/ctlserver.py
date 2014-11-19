@@ -506,7 +506,7 @@ class HybirdServer(object):
         self.__preserve()
         for item in self.thrlist:
             item.start()
-        # not block join ?
+        # none block join ?
         while 1:
             for item in self.thrlist:
                 if item is not None and item.isAlive():
