@@ -1,90 +1,85 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+﻿<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>RaspiCam</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>RaspiCam</title>
+    <link href="bootstrap.min.css" rel="stylesheet" /> 
 </head>
 <body>
 
-<div align="center">
-    <embed 
-        id="vidosrc1" 
-        width="700px" 
-        height="400px" 
-        target="rtsp://192.168.1.105:9000/" 
-        loop="yes" 
-        autoplay="true" 
-        wmode="opaque" 
-        name="video1" 
-        type="application/x-vlc-plugin"
-        >
-    </embed>
-</div>
-
-<div align="center">
-    <br />
-    <a href="javascript:;" onclick='document.video1.play()'>Play video1</a>
-    <a href="javascript:;" onclick='document.video1.pause()'>Pause video1</a>
-    <a href="javascript:;" onclick='document.video1.stop()'>Stop video1</a>
-    <a href="javascript:;" onclick='document.video1.fullscreen()'>Fullscreen</a>
-</div>
-
-<div align="center">
-    <table>
-        <tr>
-            <td style="margin-left:auto">
-                <form action="/start"  method="post" target="iframe_hide">
-                    <input type="submit" id="start" name="start_vprocess" value="start viedo process" />
-                </form>
-            </td>
-            <td style="margin-right:auto">
-                <form action="/stop"  method="post" target="iframe_hide">
-                    <input type="submit" id="stop" name="stop_vprocess" value="stop viedo process" />
-                </form>
-            </td>
-        </tr>
-    </table>
-    <br />
-    <form action="/change"  method="post" target="iframe_hide">
+    <div align="center">
+        <embed id="vidosrc1"
+               width="1000px"
+               height="400px"
+               target="rtsp://192.168.1.105:9000/"
+               loop="yes"
+               autoplay="true"
+               wmode="opaque"
+               name="video1"
+               type="application/x-vlc-plugin" />
+        </embed>
+    </div>
+	<div align="center">
+		<div class="panel">
+			<div class="panel-body">
+				<div class="col-sm-12 form-group">
+					<a href="javascript:;" onclick='document.video1.play()' class="col-sm-3 btn btn-large">Play video1</a> 
+					<a href="javascript:;" onclick='document.video1.pause()' class="col-sm-3 btn btn-large">Pause video1</a> 
+					<a href="javascript:;" onclick='document.video1.stop()' class="col-sm-3 btn btn-large">Stop video1</a> 
+					<a href="javascript:;" onclick='document.video1.fullscreen()' class="col-sm-3 btn btn-large">Fullscreen</a>
+				</div>
+			</div>
+		</div>
+	</div> 
+    <div align="center">
         <table>
             <tr>
-                <td>
-                    <label for="para_bright"> brightness: </label>
-                    <input type="text" id="para_bright" name="para_bright" style="width:50px"/>
+                <td style="margin-left:auto">
+                    <form action="/start" method="post" target="iframe_hide" class="form-inline">
+                        <input type="submit" id="start" name="start_vprocess" value="start viedo process" class="btn btn-primary" />&nbsp;&nbsp;&nbsp;&nbsp;
+                    </form>
                 </td>
-                <td>
-                    <label for="para_fps"> fps: </label>
-                    <input type="text" id="para_fps" name="para_fps" style="width:50px"/>
-                </td>
-                <td>
-                    <label for="para_bitrate"> bitrate: </label>
-                    <input type="text" id="para_bitrate" name="para_bitrate" style="width:50px"/>
+                <td style="margin-left:auto">
+                    <form action="/stop" method="post" target="iframe_hide" class="form-inline">
+                        <input type="submit" id="stop" name="stop_vprocess" value="stop viedo process" class="btn btn-primary" />
+                    </form>
                 </td>
             </tr>
-            <tr>
-                <td>
-                    <label for="para_width"> width: </label>
-                    <input type="text" id="para_width" name="para_width" style="width:50px"/>
-                </td>
+        </table> 
+        <div class="panel" align="center">
+            <div class="panel-body">
+                <form role="form" class="form-inline" action="/change" method="post" target="iframe_hide">
+                    <div class="col-sm-12 form-group">
+                        <label class="col-sm-2 control-label text-right" for="para_bright"> brightness:</label>
+                        <input type="text" class="col-sm-3 form-control" name="para_bright" id="para_bright"/>
 
-                <td>
-                    <label for="para_height"> height: </label>
-                    <input type="text" id="para_height" name="para_height" style="width:50px"/>
-                </td>
-            </tr>
-            <tr>
-                <td>
-                    <input type="submit" id="change" name="change_vprocess" value="change video parameters" />
-                </td>
-            </tr>
-        </table>
-    </form>
-</div>
+                        <label class="col-sm-2 control-label text-right" for="para_fps">fps:</label>
+                        <input type="text" class="col-sm-3 form-control" name="para_fps" id="para_fps"  />
 
+                        <label class="col-sm-2 control-label text-right" for="para_bitrate">bitrate:</label>
+                        <input type="text" class="col-sm-3 form-control" name="para_bitrate" id="para_bitrate"  />
+                    </div>
+                    <br />
+                    <br />
+                    <div class="col-sm-12 form-group">
+                        <label class="col-sm-2 control-label text-right" for="para_width"> width:</label>
+                        <input type="text" class="col-sm-3 form-control" name="para_width" id="para_width" />
 
-<div align="center">
-<iframe id="iframe_hide" name="iframe_hide" style="display:block"></iframe>
-</div>
+                        <label class="col-sm-2 control-label text-right" for="para_height">height:</label>
+                        <input type="text" class="col-sm-3 form-control" name="para_height" id="para_height" /> 
+                    </div>
+                    <br />
+                    <br />
+                    <div>
+                        <input type="submit" id="change" name="change_vprocess" value="change video parameters" class="btn btn-primary"/>
+                    </div>
+                </form>
+            </div>
+        </div>  
+    <div align="center">
+        <iframe id="iframe_hide" name="iframe_hide" style="display:block"></iframe>
+    </div>
+        </div>
 
 </body>
 </html> 

@@ -448,7 +448,6 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.__stop_process()
             return
         elif self.path == '/change':
-            # TODO add change
             self.__changevprocss(form)
             return
         else:
