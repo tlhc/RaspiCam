@@ -55,7 +55,8 @@ Software:
 
     Server:
 
-    - put ctlserver.py and index.html in your Rpi(one folder) then
+    - put server dir in your Rpi(one folder) then
+    - cd server
     - python ctlserver.py
 
     Client:
@@ -63,7 +64,7 @@ Software:
     - open with Qt then compile and run
     - (or) 
 
-        ```
+        ```bash
           - cd RaspiCamClient
           - qmake
           - make
