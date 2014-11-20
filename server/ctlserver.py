@@ -25,7 +25,7 @@ def signal_handler(signals, frame):
     try:
         if vvpmng.isset():
             if vvpmng.isrun():
-                os.killpg(vvpmng.pid(), signal.SIGTERM)
+                os.killpg(vvpmng.currpid(), signal.SIGTERM)
     finally:
         vvpmng.releaselock()
 
@@ -96,7 +96,8 @@ class Singleton(type):
     _instances = {}
     def __call__(cls, *args, **kwargs):
         if cls not in cls._instances:
-            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+            cls._instances[cls] = \
+                    super(Singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
 
 
@@ -126,7 +127,7 @@ class VideoProcessMng(object):
         if self.vvprocess is not None and self.vvprocess.poll() is None:
             return True
         return False
-    def pid(self):
+    def currpid(self):
         """ return pid """
         return self.vvprocess.pid
     def start(self):
@@ -171,7 +172,7 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
             else:
                 if self.vvpmng.isrun():
                     APPLOGGER.info('already run subprocess: ' +
-                                   str(self.vvpmng.pid()))
+                                   str(self.vvpmng.currpid()))
                     APPLOGGER.info('video process already run.')
                     self.request.sendall(self.clientcmd_start + '|' + '1')
                     self.request.sendall(self.vvpmng.process_cmd.cmd())
@@ -193,7 +194,8 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
                 self.vvpmng.stop()
                 APPLOGGER.warn('terminating..')
                 self.vvpmng.setprocess(None)
-                self.request.sendall(self.clientcmd_stop + '|' + '1') # fake done
+                # fake done
+                self.request.sendall(self.clientcmd_stop + '|' + '1')
             else:
                 APPLOGGER.info('process is terminate')
                 self.vvpmng.setprocess(None)
@@ -357,7 +359,7 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             else:
                 if self.vvpmng.isrun():
                     APPLOGGER.info('already run subprocess: ' +
-                                   str(self.vvpmng.pid()))
+                                   str(self.vvpmng.currpid()))
                     APPLOGGER.info('video process already run.')
                     self.__sendmsg(200, 'already run')
                 else:
@@ -412,7 +414,8 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.vvpmng.process_cmd.fps = \
                     setpara('para_fps', form, self.vvpmng.process_cmd.fps)
             self.vvpmng.process_cmd.bitrate = \
-                    setpara('para_bitrate', form, self.vvpmng.process_cmd.bitrate)
+                    setpara('para_bitrate', form, \
+                    self.vvpmng.process_cmd.bitrate)
             self.vvpmng.process_cmd.width = \
                     setpara('para_width', form, self.vvpmng.process_cmd.width)
             self.vvpmng.process_cmd.height = \
