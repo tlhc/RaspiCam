@@ -34,6 +34,8 @@ private slots:
 
     void on_btn_confirm_clicked();
 
+    void on_btn_remoteRcd_clicked();
+
 private:
     void _extUISetUp();
     void _exDataSetUp();

@@ -6,6 +6,7 @@
 import os
 import sys
 import cgi
+import time
 import signal
 import socket
 import threading
@@ -14,6 +15,7 @@ import SocketServer
 import BaseHTTPServer
 import logging
 import subprocess
+
 
 
 def signal_handler(signals, frame):
@@ -68,6 +70,8 @@ class RaspvidCmd(object):
         self.width = 1280
         self.height = 720
         self.stime = 0         # forever
+        self.record = False
+        self.recordfname = ''
 
     def cmd(self):
         """ return cmd str """
@@ -86,8 +90,15 @@ class RaspvidCmd(object):
 
         cmdstr += '|' + ' '
         cmdstr += vlcbase + ' '
-        cmdstr += "-vvv stream:///dev/stdin --sout '#rtp{sdp=rtsp://:"
-        cmdstr += str(self.rtsp_port) + "/}' :demux=h264"
+        cmdstr += '-vvv stream:///dev/stdin --sout' + ' '
+        if self.record and self.recordfname is not '':
+            cmdstr += "'#duplicate{dst=rtp{sdp=rtsp://:" + \
+                      str(self.rtsp_port) + '/}' + \
+                      ',dst=standard{access=file,mux=mp4,dst=' + \
+                      self.recordfname +'.mp4' + "}}'" + ' :demux=h264'
+        else:
+            cmdstr += "'#rtp{sdp=rtsp://:"
+            cmdstr += str(self.rtsp_port) + "/}' :demux=h264"
         return cmdstr
 
 
@@ -165,6 +176,8 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
         """ start video process """
         self.vvpmng.getlock()
         try:
+            self.vvpmng.process_cmd.record = False
+            self.vvpmng.process_cmd.recordfname = ''
             if not self.vvpmng.isset():
                 self.vvpmng.start()
                 self.request.sendall(self.vvpmng.process_cmd.cmd())
@@ -249,6 +262,47 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
         finally:
             self.vvpmng.releaselock()
 
+    def __record(self):
+        recdir = '/home/pi/records'
+        currtime = time.gmtime()
+        rec_sub_dir_name = ''
+        rec_sub_dir_name += str(currtime.tm_year) + '_'
+        rec_sub_dir_name += str(currtime.tm_mon) + '_'
+        rec_sub_dir_name += str(currtime.tm_mday)
+        day_recdir = recdir + '/' + rec_sub_dir_name
+        filename = str(currtime.tm_hour) + ':' + \
+                   str(currtime.tm_min) + ':' + \
+                   str(currtime.tm_sec)
+        whole_fname = day_recdir + '/' + filename
+        if os.path.exists(day_recdir):
+            if os.path.isdir(day_recdir):
+                if os.path.exists(whole_fname):
+                    os.remove(whole_fname)
+            else:
+                os.remove(day_recdir)
+                os.makedirs(day_recdir)
+        else:
+            os.makedirs(day_recdir)
+
+        self.vvpmng.getlock()
+        self.vvpmng.process_cmd.record = True
+        self.vvpmng.process_cmd.recordfname = whole_fname
+        APPLOGGER.debug(self.vvpmng.process_cmd.cmd())
+        try:
+            if not self.vvpmng.isset():
+                self.vvpmng.start()
+                return
+            if self.vvpmng.isrun():
+                self.vvpmng.stop()
+                self.vvpmng.setprocess(None)
+                self.vvpmng.start()
+            else:
+                self.vvpmng.start()
+        finally:
+            self.request.sendall(self.vvpmng.process_cmd.cmd())
+            self.vvpmng.releaselock()
+
+
     def __process_req(self, data):
         """ process req """
         data = data.strip(' \n')
@@ -262,6 +316,8 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
             self.__sysinfo()
         elif data.lower().startswith('change'):
             self.__changevprocss(data)
+        elif data.lower() == 'record':
+            self.__record()
         else:
             APPLOGGER.info('Cmd not support: ' + data)
 

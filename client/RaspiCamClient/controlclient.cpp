@@ -1,5 +1,4 @@
 #include "controlclient.h"
-#include <QStringList>
 #include <QEventLoop>
 
 
@@ -12,6 +11,7 @@ ControlClient::ControlClient(QHostAddress server, qint16 port, QObject *parent) 
     _request = new TcpRequest(this, 1);
     connect(_request, SIGNAL(sigmsg(QString)), this, SLOT(servermsg(QString)));
     _raspcmd_prefix = "raspivid";
+    _supportcmds << "start" << "stop" << "change" << "record";
 }
 
 ControlClient::~ControlClient() {
@@ -22,23 +22,38 @@ ControlClient::~ControlClient() {
 }
 
 void ControlClient::start() {
-    if(_request->connectHost(_serveraddr, _port, 100)) {
-        _request->sendData("start");
-    }
+    _sig_cmd("start");
 }
 
 void ControlClient::stop() {
-    if(_request->connectHost(_serveraddr, _port, 100)) {
-        _request->sendData("stop");
+    _sig_cmd("stop");
+}
+
+void ControlClient::_sig_cmd(const QString &cmd) {
+    if(_supportcmds.contains(cmd)) {
+        if(_request->connectHost(_serveraddr, _port, 100)) {
+            _request->sendData(cmd.toStdString().c_str());
+        }
+    }
+}
+
+void ControlClient::_para_cmd(const QString &prefix, const QString &params) {
+    if(_supportcmds.contains(prefix)) {
+        QString cmd = "";
+        cmd = prefix + "|";
+        cmd += params;
+        if(_request->connectHost(_serveraddr, _port, 100)) {
+            _request->sendData(cmd.toStdString().c_str());
+        }
     }
 }
 
 void ControlClient::change(QString params) {
-    if(_request->connectHost(_serveraddr, _port, 100)) {
-        QString cmd = "change|";
-        cmd += params;
-        _request->sendData(cmd.toStdString().c_str());
-    }
+    _para_cmd("change", params);
+}
+
+void ControlClient::record() {
+    _sig_cmd("record");
 }
 
 

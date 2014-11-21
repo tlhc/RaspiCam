@@ -27,6 +27,8 @@ Software:
 
  - (Capture video use raspivid and Streaming video use vlc)
  - support start, stop video streaming control
+ - support video record local(pc) and remote(Pi) 
+   (local record file in currdir remote record file in /home/pi/records/year-month-day/hh:mm:ss.mp4)
  - support remote change video streaming parameters(brightness, fps, bitrate, video width, video height...)
  - support auto discovery
  - support web access(control)
@@ -36,6 +38,7 @@ Software:
  - (Play video use libvlc based on Qt)
  - support auto discovery Rpi(just push scan button)
  - support start, stop control
+ - support record and remote-record control
  - support remote change Rpi video streaming parameters(brightness, fps, bitrate, video width, video height...)
 
 

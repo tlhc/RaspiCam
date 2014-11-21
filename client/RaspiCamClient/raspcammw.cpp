@@ -44,6 +44,7 @@ void RaspCamMW::_extUISetUp() {
     ui->le_fps->setEnabled(false);
     ui->le_height->setEnabled(false);
     ui->le_width->setEnabled(false);
+    ui->btn_remoteRcd->setEnabled(false);
 }
 
 void RaspCamMW::_exDataSetUp() {
@@ -145,6 +146,7 @@ void RaspCamMW::recvmsg(QString msg) {
     ui->btnRecord->setEnabled(true);
     ui->btnStart->setEnabled(true);
     ui->btnStop->setEnabled(true);
+    ui->btn_remoteRcd->setEnabled(true);
 
     ui->btn_confirm->setEnabled(true);
     ui->le_bright->setEnabled(true);
@@ -221,3 +223,16 @@ void RaspCamMW::on_btn_confirm_clicked() {
     QTimer::singleShot(_cntdown_msec, this, SLOT(laterstart()));
 }
 
+
+void RaspCamMW::on_btn_remoteRcd_clicked() {
+    if(_vview->isStart()) {
+        _vview->stop();
+    }
+    if(ctlc != NULL) {
+        ctlc->record();
+        _vview->setWeburl(_streamurl);
+        _processtimer.start();
+        _processtime.restart();
+        QTimer::singleShot(_cntdown_msec, this, SLOT(laterstart()));
+    }
+}
