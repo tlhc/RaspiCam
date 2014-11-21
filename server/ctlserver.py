@@ -407,6 +407,8 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def __start_process(self):
         """ start the video process """
         self.vvpmng.getlock()
+        self.vvpmng.process_cmd.record = False
+        self.vvpmng.process_cmd.recordfname = ''
         try:
             if not self.vvpmng.isset():
                 self.vvpmng.start()
