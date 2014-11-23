@@ -66,13 +66,11 @@ Software:
 
     - open with Qt then compile and run
     - (or) 
-
-
-        ```
+```bash
           - cd RaspiCamClient
           - qmake
           - make
-        ```
+```
 
 
 
