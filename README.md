@@ -67,9 +67,9 @@ Software:
     - open with Qt then compile and run
     - (or) 
 ```bash
-          - cd RaspiCamClient
-          - qmake
-          - make
+    1.cd RaspiCamClient
+    2.qmake
+    3.make
 ```
 
 
