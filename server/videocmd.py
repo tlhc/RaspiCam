@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # coding:utf-8
 
-""" video cmd """
+""" video cmd generator """
+
 from logger import APPLOGGER
 
 class RaspvidCmd(object):

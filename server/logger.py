@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # coding:utf-8
+
 """ logger """
+
 import logging
 def loggerinit():
     """ init logger """

@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # coding:utf-8
 
-""" http server """
+""" http server for control Rpi video process """
+
 import os
 import sys
 import cgi

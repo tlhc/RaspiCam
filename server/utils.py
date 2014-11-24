@@ -2,7 +2,8 @@
 #!/usr/bin/env python
 # coding:utf-8
 
-""" utils """
+""" utils for RaspiCam """
+
 import netifaces
 from logger import APPLOGGER
 
