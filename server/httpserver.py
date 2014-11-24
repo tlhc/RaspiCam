@@ -30,7 +30,7 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def do_GET(self):
         """ GET """
         if self.path == '/':
-            self.path = '/index.html'
+            self.path = './www/index.html'
         try:
             # Check the file extension required and
             # set the right mime type

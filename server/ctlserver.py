@@ -42,12 +42,12 @@ class HybirdServer(object):
         """ preserve """
         self.thrlist = []
         for name in self.__callbacklistdict.keys():
-            _cbinfo = self.__callbacklistdict[name]
+            cbinfo = self.__callbacklistdict[name]
             # quick and dirty
-            _tmpthr = threading.Thread(target=_cbinfo[0], args=_cbinfo[1])
-            _tmpthr.setDaemon(True)
-            _tmpthr.setName(name)
-            self.thrlist.append(_tmpthr)
+            tmpthr = threading.Thread(target=cbinfo[0], args=cbinfo[1])
+            tmpthr.setDaemon(True)
+            tmpthr.setName(name)
+            self.thrlist.append(tmpthr)
     def serve(self):
         """ serve all """
         self.__preserve()
