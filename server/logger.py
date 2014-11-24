@@ -21,7 +21,6 @@ APPLOGGER.setLevel('DEBUG')
 
 
 if __name__ == '__main__':
-    """ test """
     APPLOGGER.debug('debug')
     APPLOGGER.info('info')
     APPLOGGER.warn('warn')
