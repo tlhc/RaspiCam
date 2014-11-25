@@ -129,16 +129,20 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
     def __record(self):
         """ record video file """
         recfname = ''
+        can_rec = False
         try:
-            if self.recmng.can_record():
+            if self.recmng.have_space() or self.recmng.cycle == True:
                 recfname = self.recmng.gen_recordfname()
-                if not recfname == '':
+                if recfname == '':
                     raise AppException('record file name is null')
+                can_rec = True
             else:
                 raise AppException('no space to record')
         except AppException as ex:
             APPLOGGER.error(ex)
 
+        if not can_rec:
+            return
         self.vvpmng.getlock()
         self.vvpmng.process_cmd.record = True
         self.vvpmng.process_cmd.recordfname = recfname

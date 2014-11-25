@@ -35,7 +35,7 @@ class RaspvidCmd(object):
 
         cmdstr += '|' + ' '
         cmdstr += vlcbase + ' '
-        cmdstr += '-vvv stream:///dev/stdin --sout' + ' '
+        cmdstr += 'stream:///dev/stdin --sout' + ' '
         if self.record and self.recordfname is not '':
             cmdstr += "'#duplicate{dst=rtp{sdp=rtsp://:" + \
                       str(self.rtsp_port) + '/}' + \

@@ -52,7 +52,6 @@ class RecordMng(object):
                 return 1
 
         rec_files.sort(cmp=filesort)
-
         def getfsize(path):
             """ get size for %.3f """
             return float('%.3f' % (getsize(path) / 1024.0 / 1024.0))
@@ -65,7 +64,7 @@ class RecordMng(object):
         APPLOGGER.debug('free space is: ' + str(self.get_freespaces()))
 
 
-    def can_record(self):
+    def have_space(self):
         """ can record videos if we have enough disk space just pre check """
         if int(self.get_freespaces()) < self.lefthrhold:
             return False
@@ -98,7 +97,7 @@ class RecordMng(object):
 
         # can record but don't have enough space
         try:
-            if self.can_record():
+            if self.have_space():
                 return whole_fname
             else:
                 if self.cycle:
@@ -109,6 +108,20 @@ class RecordMng(object):
             APPLOGGER.info('free space is: ' + str(self.get_freespaces()))
             APPLOGGER.info('limit is : ' + str(self.lefthrhold))
             APPLOGGER.error(ex)
+    def rm_recordfiles(self, rmfpath):
+        """ 0  rm success
+           -1  can't remove
+            1  already remove """
+        rec_files = self.get_recordfiles()
+        if rmfpath in rec_files:
+            try:
+                remove(rmfpath)
+                return 0
+            except OSError:
+                pass
+            return -1
+        return 1
+
 
 if __name__ == '__main__':
     RECORDMNG = RecordMng('/home/pi/records/')
@@ -117,9 +130,9 @@ if __name__ == '__main__':
     APPLOGGER.debug(len(ALLFILES))
 
     APPLOGGER.debug(RECORDMNG.get_freespaces())
-    APPLOGGER.debug(RECORDMNG.can_record())
+    APPLOGGER.debug(RECORDMNG.have_space())
     RECORDMNG.lefthrhold = 350
     RECORDMNG.cycle = True
-    APPLOGGER.debug(RECORDMNG.can_record())
+    APPLOGGER.debug(RECORDMNG.have_space())
     APPLOGGER.debug(RECORDMNG.gen_recordfname())
 
