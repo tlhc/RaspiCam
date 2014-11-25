@@ -9,15 +9,23 @@ from logger import APPLOGGER
 from time import gmtime
 from utils import Singleton
 from utils import AppException
+from threading import Lock
 
 class RecordMng(object):
     """ record video file manager """
     __metaclass__ = Singleton
     def __init__(self, record_base):
         self.__recordbase = record_base
+        self.__reclock = Lock()
         self.lefthrhold = 100    #threshhold disk space for record in MB
         self.cycle = False
         APPLOGGER.debug(record_base)
+    def getlock(self):
+        """ get lock """
+        self.__reclock.acquire()
+    def releaselock(self):
+        """ release lock """
+        self.__reclock.release()
 
     def get_recordfiles(self):
         """ get all record files """

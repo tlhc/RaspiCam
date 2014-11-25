@@ -24,8 +24,12 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
         self.maxbuf = 2048
         self.vvpmng = VideoProcessMng()
         self.recmng = RecordMng('/home/pi/records')
-        self.recmng.cycle = True     # can cycle record
-        self.recmng.lefthrhold = 350 # limit threshhold is 350MB
+        self.recmng.getlock()
+        try:
+            self.recmng.cycle = True     # can cycle record
+            self.recmng.lefthrhold = 350 # limit threshhold is 350MB
+        finally:
+            self.recmng.releaselock()
         self.clientcmd_start = 'start'
         self.clientcmd_stop = 'stop'
         SocketServer.BaseRequestHandler.__init__(self, request,
@@ -130,6 +134,7 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
         """ record video file """
         recfname = ''
         can_rec = False
+        self.recmng.getlock()
         try:
             if self.recmng.have_space() or self.recmng.cycle == True:
                 recfname = self.recmng.gen_recordfname()
@@ -140,9 +145,12 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
                 raise AppException('no space to record')
         except AppException as ex:
             APPLOGGER.error(ex)
+        finally:
+            self.recmng.releaselock()
 
         if not can_rec:
             return
+
         self.vvpmng.getlock()
         self.vvpmng.process_cmd.record = True
         self.vvpmng.process_cmd.recordfname = recfname
