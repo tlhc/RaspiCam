@@ -4,6 +4,7 @@
 """ logger """
 
 import logging
+
 def loggerinit():
     """ init logger """
     fstr = '%(asctime)s %(levelname)-8s %(funcName)s %(lineno)s %(message)s'

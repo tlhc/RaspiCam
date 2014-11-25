@@ -8,25 +8,23 @@
 <body>
 
     <div align="center">
-        <embed id="vidosrc1"
-               width="1000px"
-               height="400px"
+        <embed id="video1"
+               width="640px"
+               height="480px"
                target="rtsp://192.168.1.105:9000/"
-               loop="yes"
-               autoplay="true"
-               wmode="opaque"
+               autoplay="yes"
                name="video1"
                type="application/x-vlc-plugin" />
         </embed>
     </div>
 	<div align="center">
-		<div class="panel">
+		<div class="panel" align="center" style="margin-left:400px">
 			<div class="panel-body">
 				<div class="col-sm-12 form-group">
-					<a href="javascript:;" onclick='document.video1.play()' class="col-sm-3 btn btn-large">Play video1</a> 
-					<a href="javascript:;" onclick='document.video1.pause()' class="col-sm-3 btn btn-large">Pause video1</a> 
-					<a href="javascript:;" onclick='document.video1.stop()' class="col-sm-3 btn btn-large">Stop video1</a> 
-					<a href="javascript:;" onclick='document.video1.fullscreen()' class="col-sm-3 btn btn-large">Fullscreen</a>
+					<a href="javascript:;" onclick='document.video1.play();' class="col-sm-3 btn btn-large" style="width:100px">Play video1</a> 
+					<a href="javascript:;" onclick='document.video1.pause();' class="col-sm-3 btn btn-large" style="width:100px">Pause video1</a> 
+					<a href="javascript:;" onclick='document.video1.stop();' class="col-sm-3 btn btn-large" style="width:100px">Stop video1</a> 
+					<a href="javascript:;" onclick='document.video1.fullscreen();' class="col-sm-3 btn btn-large" style="width:100px">Fullscreen</a>
 				</div>
 			</div>
 		</div>

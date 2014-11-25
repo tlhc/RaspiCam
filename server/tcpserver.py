@@ -3,15 +3,14 @@
 
 """ tcp server for control Rpi video process """
 
-import os
 import sys
-import time
 import socket
 import threading
 import SocketServer
 from logger import APPLOGGER
 from utils import AppException
 from utils import get_local_ip
+from recordmng import RecordMng
 from processmng import VideoProcessMng
 
 class TcpCtlServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
@@ -24,6 +23,9 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
     def __init__(self, request, client_address, server):
         self.maxbuf = 2048
         self.vvpmng = VideoProcessMng()
+        self.recmng = RecordMng('/home/pi/records')
+        self.recmng.cycle = True     # can cycle record
+        self.recmng.lefthrhold = 350 # limit threshhold is 350MB
         self.clientcmd_start = 'start'
         self.clientcmd_stop = 'stop'
         SocketServer.BaseRequestHandler.__init__(self, request,
@@ -125,30 +127,21 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
             self.vvpmng.releaselock()
 
     def __record(self):
-        recdir = '/home/pi/records'
-        currtime = time.gmtime()
-        rec_sub_dir_name = ''
-        rec_sub_dir_name += str(currtime.tm_year) + '_'
-        rec_sub_dir_name += str(currtime.tm_mon) + '_'
-        rec_sub_dir_name += str(currtime.tm_mday)
-        day_recdir = recdir + '/' + rec_sub_dir_name
-        filename = str(currtime.tm_hour) + ':' + \
-                   str(currtime.tm_min) + ':' + \
-                   str(currtime.tm_sec)
-        whole_fname = day_recdir + '/' + filename
-        if os.path.exists(day_recdir):
-            if os.path.isdir(day_recdir):
-                if os.path.exists(whole_fname):
-                    os.remove(whole_fname)
+        """ record video file """
+        recfname = ''
+        try:
+            if self.recmng.can_record():
+                recfname = self.recmng.gen_recordfname()
+                if not recfname == '':
+                    raise AppException('record file name is null')
             else:
-                os.remove(day_recdir)
-                os.makedirs(day_recdir)
-        else:
-            os.makedirs(day_recdir)
+                raise AppException('no space to record')
+        except AppException as ex:
+            APPLOGGER.error(ex)
 
         self.vvpmng.getlock()
         self.vvpmng.process_cmd.record = True
-        self.vvpmng.process_cmd.recordfname = whole_fname
+        self.vvpmng.process_cmd.recordfname = recfname
         APPLOGGER.debug(self.vvpmng.process_cmd.cmd())
         try:
             if not self.vvpmng.isset():
