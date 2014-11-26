@@ -65,8 +65,9 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         except IOError:
             self.send_error(404, 'File Not Found: %s' % self.path)
 
-    def __start_process(self):
+    def __start(self, form):
         """ start the video process """
+        _ = form
         self.vvpmng.getlock()
         self.vvpmng.process_cmd.record = False
         self.vvpmng.process_cmd.recordfname = ''
@@ -87,8 +88,9 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         finally:
             self.vvpmng.releaselock()
 
-    def __stop_process(self):
+    def __stop(self, form):
         """ stop the video process """
+        _ = form
         self.vvpmng.getlock()
         try:
             if not self.vvpmng.isset():
@@ -107,7 +109,7 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         finally:
             self.vvpmng.releaselock()
 
-    def __changevprocss(self, form):
+    def __change(self, form):
         """ change video process params """
         self.vvpmng.getlock()
         try:
@@ -163,22 +165,18 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         form = cgi.FieldStorage(fp=self.rfile,
                                 headers=self.headers,
                                 environ=_environ)
-        if self.path == '/start':
-            self.__start_process()
-            return
-        elif self.path == '/stop':
-            self.__stop_process()
-            return
-        elif self.path == '/change':
-            self.__changevprocss(form)
-            return
+        action = self.path
+        callinfo = action.replace('/', ' ').strip(' ')
+        callinfo = '__' + callinfo
+        callback = getattr(self, '_' + self.__class__.__name__ + callinfo)
+        if callback != None and callable(callback):
+            callback(form)
         else:
+            APPLOGGER.debug(self.path)
             APPLOGGER.debug(str(form))
             self.send_response(503)
             self.end_headers()
-            return
-
-
+        
 class HttpCtlServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
     """ ThreadedHTTPServer """
     allow_reuse_address = True
