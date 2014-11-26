@@ -40,7 +40,7 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
         data = self.request.recv(self.maxbuf)
         self.__process_req(data)
 
-    def __start_process(self):
+    def __start(self):
         """ start video process """
         self.vvpmng.getlock()
         try:
@@ -63,7 +63,7 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
         finally:
             self.vvpmng.releaselock()
 
-    def __stop_process(self):
+    def __stop(self):
         """ __stop_process """
         self.vvpmng.getlock()
         try:
@@ -84,13 +84,13 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
         finally:
             self.vvpmng.releaselock()
 
-    def __sysinfo(self):
+    def __get(self):
         """ for get cmd """
         ipaddr, _ = self.server.server_address
         vport = self.vvpmng.process_cmd.rtsp_port
         self.request.sendall(str(ipaddr) + ':' + str(vport))
 
-    def __changevprocss(self, data):
+    def __change(self, data):
         """ change video process paramters
             change|cmd1=opt, cmd2=opt2, ... """
         data = data.lstrip('change|')
@@ -175,19 +175,22 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
         data = data.strip(' \n')
         if len(data) <= 0:
             return
-        if data.lower() == 'start':
-            self.__start_process()
-        elif data.lower() == 'stop':
-            self.__stop_process()
-        elif data.lower() == 'get':
-            self.__sysinfo()
-        elif data.lower().startswith('change'):
-            self.__changevprocss(data)
-        elif data.lower() == 'record':
-            self.__record()
+        callinfo = data.lower()
+        callinfo = '__' + callinfo
+        callinfo = callinfo.split('|')
+        splitlen = len(callinfo)
+        if splitlen < 1 or splitlen > 2:
+            APPLOGGER.warn('request parameter not correct')
+            return
+        callback = getattr(self, '_' + \
+                self.__class__.__name__ + callinfo[0])
+        if callback != None and callable(callback):
+            if splitlen == 1:
+                callback()
+            else:
+                callback(data)
         else:
-            APPLOGGER.info('Cmd not support: ' + data)
-
+            APPLOGGER.error('request callback error')
 
 def tcpserve(ipaddr, serve_port):
     """ tcpserve """
