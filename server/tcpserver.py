@@ -82,6 +82,8 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
                 self.vvpmng.setprocess(None)
                 self.request.sendall(self.clientcmd_stop + '|' + '0')
         finally:
+            self.vvpmng.process_cmd.record = False
+            self.vvpmng.process_cmd.recordfname = ''
             self.vvpmng.releaselock()
 
     def __get(self):
@@ -115,6 +117,10 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
             self.vvpmng.process_cmd.height = int(paradict['height'])
         if 'width' in paradict:
             self.vvpmng.process_cmd.width = int(paradict['width'])
+
+        # just change parameter no record here
+        self.vvpmng.process_cmd.record = False
+        self.vvpmng.process_cmd.recordfname = ''
 
         self.vvpmng.getlock()
         try:

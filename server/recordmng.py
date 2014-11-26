@@ -130,6 +130,10 @@ class RecordMng(object):
             return -1
         return 1
 
+    def watch_dog(self):
+        """ watch the free space """
+        pass
+
 
 if __name__ == '__main__':
     RECORDMNG = RecordMng('/home/pi/records/')
