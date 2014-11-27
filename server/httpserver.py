@@ -19,9 +19,11 @@ from processmng import VideoProcessMng
 class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     """ HttpHandler for GET and POST """
     def __init__(self, request, client_address, server):
-        self.vvpmng = VideoProcessMng()
+        self.server = server
+        self.vvpmng = VideoProcessMng(self.server.cfg.video)
         BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, request,
                                                        client_address, server)
+
     def __sendmsg(self, code, msg):
         """ send msg to client """
         self.send_response(code)
@@ -176,25 +178,34 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             APPLOGGER.debug(str(form))
             self.send_response(503)
             self.end_headers()
-        
+
 class HttpCtlServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
     """ ThreadedHTTPServer """
-    allow_reuse_address = True
+    def __init__(self, server_address, RequestHandler, cfg):
+        self.allow_reuse_address = True
+        self.cfg = cfg
+        BaseHTTPServer.HTTPServer.__init__(self, server_address, RequestHandler)
 
 
-def httpserve(ipaddr, serve_port):
+def httpserve(ipaddr, serve_port, cfg):
     """ httpserve """
     try:
         if ipaddr is '':
             raise AppException('get local ip exp')
         if int(serve_port) <= 0 or int(serve_port) > 65535:
             raise AppException('port num err')
+        if cfg == None:
+            raise AppException('cfg is null')
+        else:
+            from utils import ConfigObject
+            if type(cfg) != ConfigObject:
+                raise AppException('parameter type not correct')
     except AppException as ex:
         APPLOGGER.error(ex)
     APPLOGGER.info('Server Up IP=%s PORT=%s', ipaddr, serve_port)
     server = None
     try:
-        server = HttpCtlServer((ipaddr, serve_port), HttpCtlHandler)
+        server = HttpCtlServer((ipaddr, serve_port), HttpCtlHandler, cfg)
     except socket.error as ex:
         APPLOGGER.error(ex)
         sys.exit(1)
@@ -203,7 +214,14 @@ def httpserve(ipaddr, serve_port):
     else:
         APPLOGGER.error('http server start error')
 
+def __test():
+    """ test function """
+    from utils import ConfigReader
+    config_parser = ConfigReader('./config/raspicam.cfg')
+    cfg = config_parser.parser()
+    server, port = get_local_ip(), 8080
+    httpserve(server, port, cfg)
 
 if __name__ == '__main__':
-    SERVER, PORT = get_local_ip(), 8080
-    httpserve(SERVER, PORT)
+    __test()
+

@@ -9,6 +9,7 @@ import signal
 import threading
 from utils import AppException
 from utils import get_local_ip
+from utils import ConfigReader
 from logger import APPLOGGER
 from tcpserver import tcpserve
 from httpserver import httpserve
@@ -18,7 +19,10 @@ def signal_handler(signals, frame):
     """ handle ctrl -c """
     _, _ = signals, frame
     APPLOGGER.info('server exiting..')
-    vvpmng = VideoProcessMng()
+    # TODO fix this!!!!
+    cfg_parser = ConfigReader('./config/raspicam.cfg')
+    cfg = cfg_parser.parser()
+    vvpmng = VideoProcessMng(cfg.video)
     vvpmng.getlock()
     try:
         if vvpmng.isset():
@@ -61,6 +65,9 @@ class HybirdServer(object):
 
 def main():
     """ serve for all """
+    config_path = './config/raspicam.cfg'
+    cfg_parser = ConfigReader(config_path)
+    cfg = cfg_parser.parser()
     hyserve = HybirdServer()
     # you can start tcp server or http server
     try:
@@ -69,8 +76,8 @@ def main():
         http_port = 8080
         if local_ip == '':
             raise AppException('local ip is empty')
-        hyserve.setservices('httpserver', httpserve, (local_ip, http_port))
-        hyserve.setservices('tcpserver', tcpserve, (local_ip, tcpctl_port))
+        hyserve.setservices('httpserver', httpserve, (local_ip, http_port, cfg))
+        hyserve.setservices('tcpserver', tcpserve, (local_ip, tcpctl_port, cfg))
         hyserve.serve()
     except AppException as ex:
         APPLOGGER.error(ex)

@@ -11,13 +11,14 @@ from logger import APPLOGGER
 from videocmd import RaspvidCmd
 from utils import Singleton
 
+
 class VideoProcessMng(object):
     """ VideoProcessMng ensure one video process in thread """
     __metaclass__ = Singleton
-    def __init__(self):
+    def __init__(self, cfg):
         self.vvprocess = None
         self.__process_lock = threading.Lock()
-        self.process_cmd = RaspvidCmd()
+        self.process_cmd = RaspvidCmd(cfg)
     def getlock(self):
         """ get lock """
         self.__process_lock.acquire()
@@ -55,13 +56,19 @@ class VideoProcessMng(object):
             os.killpg(self.vvprocess.pid, signal.SIGTERM)
             APPLOGGER.info('send video process stoped signal')
 
+def __test():
+    """ test function """
+    from utils import ConfigReader
+    cfg_parser = ConfigReader('./config/raspicam.cfg')
+    cfg = cfg_parser.parser()
+    processmng = VideoProcessMng(cfg.video)
+    processmng.getlock()
+    processmng.start()
+    processmng.releaselock()
+
+    processmng.getlock()
+    processmng.stop()
+    processmng.releaselock()
+
 if __name__ == '__main__':
-    PROCESSMNG = VideoProcessMng()
-    PROCESSMNG.getlock()
-    PROCESSMNG.start()
-    PROCESSMNG.releaselock()
-
-    PROCESSMNG.getlock()
-    PROCESSMNG.stop()
-    PROCESSMNG.releaselock()
-
+    __test()

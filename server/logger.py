@@ -22,10 +22,14 @@ def loggerinit():
 APPLOGGER = loggerinit()
 APPLOGGER.setLevel('DEBUG')
 
-
-if __name__ == '__main__':
+def __test():
+    """ test function """
     APPLOGGER.debug('debug')
     APPLOGGER.info('info')
     APPLOGGER.warn('warn')
     APPLOGGER.error('error')
     APPLOGGER.critical('critical')
+
+if __name__ == '__main__':
+    __test()
+

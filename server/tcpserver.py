@@ -10,33 +10,31 @@ import SocketServer
 from logger import APPLOGGER
 from utils import AppException
 from utils import get_local_ip
+from utils import ConfigReader
 from recordmng import RecordMng
 from processmng import VideoProcessMng
 
 class TcpCtlServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     """ TCPServer """
-    allow_reuse_address = True
-
+    def __init__(self, server_address, RequestHandler, cfg):
+        self.allow_reuse_address = True
+        self.cfg = cfg
+        SocketServer.TCPServer.__init__(self, server_address, RequestHandler)
 
 class TcpCtlHandler(SocketServer.BaseRequestHandler):
     """ TCPServer RequestHandler """
     def __init__(self, request, client_address, server):
+        self.server = server
         self.maxbuf = 2048
-        self.vvpmng = VideoProcessMng()
-        self.recmng = RecordMng('/home/pi/records')
-        self.recmng.getlock()
-        try:
-            self.recmng.cycle = True     # can cycle record
-            self.recmng.lefthrhold = 350 # limit threshhold is 350MB
-        finally:
-            self.recmng.releaselock()
+        self.vvpmng = VideoProcessMng(self.server.cfg.video)
+        self.recmng = RecordMng(self.server.cfg.record)
         self.clientcmd_start = 'start'
         self.clientcmd_stop = 'stop'
         SocketServer.BaseRequestHandler.__init__(self, request,
                                                  client_address, server)
 
     def handle(self):
-        APPLOGGER.info('theading number is ' + str(threading.activeCount()))
+        APPLOGGER.debug('theading number is ' + str(threading.activeCount()))
         data = self.request.recv(self.maxbuf)
         self.__process_req(data)
 
@@ -198,7 +196,7 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
         else:
             APPLOGGER.error('request callback error')
 
-def tcpserve(ipaddr, serve_port):
+def tcpserve(ipaddr, serve_port, cfg):
     """ tcpserve """
     try:
         if ipaddr is '':
@@ -211,7 +209,7 @@ def tcpserve(ipaddr, serve_port):
     host, port = ipaddr, int(serve_port)
     server = None
     try:
-        server = TcpCtlServer((host, port), TcpCtlHandler)
+        server = TcpCtlServer((host, port), TcpCtlHandler, cfg)
     except socket.error as ex:
         APPLOGGER.error(ex)
         sys.exit(1)
@@ -221,7 +219,13 @@ def tcpserve(ipaddr, serve_port):
     else:
         raise AppException('server start err')
 
+def __test():
+    """ test function """
+    server, port = get_local_ip(), 9999
+    config_path = './config/raspicam.cfg'
+    cfg_parser = ConfigReader(config_path)
+    cfg = cfg_parser.parser()
+    tcpserve(server, port, cfg)
 
 if __name__ == '__main__':
-    SERVER, PORT = get_local_ip(), 9999
-    tcpserve(SERVER, PORT)
+    __test()

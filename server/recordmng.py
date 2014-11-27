@@ -2,24 +2,34 @@
 # coding:utf-8
 
 """ record manager """
+
 from os import listdir
 from os import statvfs, remove, makedirs
 from os.path import isdir, join, isfile, exists, getctime, getsize
 from logger import APPLOGGER
 from time import gmtime
+from time import sleep
 from utils import Singleton
 from utils import AppException
-from threading import Lock
+from threading import Lock, Thread
 
 class RecordMng(object):
     """ record video file manager """
     __metaclass__ = Singleton
-    def __init__(self, record_base):
-        self.__recordbase = record_base
+    def __init__(self, cfg):
         self.__reclock = Lock()
-        self.lefthrhold = 100    #threshhold disk space for record in MB
-        self.cycle = False
-        APPLOGGER.debug(record_base)
+        self.__recordbase = cfg.base.strip("'") \
+                if cfg.base != '' else '/home/pi/records'
+        self.lefthrhold = cfg.fsp_limit if cfg.fsp_limit != -1 else 100
+        self.cycle = cfg.cycle if cfg.cycle != None else False
+
+        self.__watchthr = None
+        self.__watchthr = Thread(target=self.__watch_dog)
+        self.__watchthr.setDaemon(True)
+        self.__watchthr.setName('watchthr')
+        self.__watchthr.start()
+        APPLOGGER.debug(cfg.base)
+
     def getlock(self):
         """ get lock """
         self.__reclock.acquire()
@@ -29,21 +39,25 @@ class RecordMng(object):
 
     def get_recordfiles(self):
         """ get all record files """
-        dirs = [item for item in listdir(self.__recordbase) \
-                if isdir(join(self.__recordbase, item))]
-        day_dir = [join(self.__recordbase, item) for item in dirs]
         allfiles = []
-        for rec_dir in day_dir:
-            files = [join(rec_dir, item) for item in listdir(rec_dir) \
-                     if isfile(join(rec_dir, item))]
-            allfiles.extend(files)
+        if exists(self.__recordbase) and isdir(self.__recordbase):
+            dirs = [item for item in listdir(self.__recordbase) \
+                    if isdir(join(self.__recordbase, item))]
+            day_dir = [join(self.__recordbase, item) for item in dirs]
+
+            for rec_dir in day_dir:
+                files = [join(rec_dir, item) for item in listdir(rec_dir) \
+                         if isfile(join(rec_dir, item))]
+                allfiles.extend(files)
         return allfiles
 
     def get_freespaces(self):
         """ get the base dir free space in MB """
-        vfsinfo = statvfs(self.__recordbase)
-        tsize = (vfsinfo.f_bavail * vfsinfo.f_frsize) / 1024
-        return tsize / 1024
+        if exists(self.__recordbase) and isdir(self.__recordbase):
+            vfsinfo = statvfs(self.__recordbase)
+            tsize = (vfsinfo.f_bavail * vfsinfo.f_frsize) / 1024
+            return tsize / 1024
+        return 0
 
     def __free_space(self):
         """ free disk space for record if self.cycle == True """
@@ -116,6 +130,7 @@ class RecordMng(object):
             APPLOGGER.info('free space is: ' + str(self.get_freespaces()))
             APPLOGGER.info('limit is : ' + str(self.lefthrhold))
             APPLOGGER.error(ex)
+
     def rm_recordfiles(self, rmfpath):
         """ 0  rm success
            -1  can't remove
@@ -130,21 +145,40 @@ class RecordMng(object):
             return -1
         return 1
 
-    def watch_dog(self):
+    def __watch_dog(self):
         """ watch the free space """
-        pass
+        while 1:
+            self.getlock()
+            try:
+                if not self.have_space() and self.cycle:
+                    self.__free_space()
+            except OSError:
+                pass
+            finally:
+                self.releaselock()
 
+            APPLOGGER.debug('free space is: ' + \
+                    str(self.get_freespaces()) + 'MB')
+            sleep(2)
+
+
+def __test():
+    """ test func """
+    from utils import ConfigReader
+    cfg_parser = ConfigReader('./config/raspicam.cfg')
+    cfg = cfg_parser.parser()
+    recordmng = RecordMng(cfg.record)
+    allfiles = recordmng.get_recordfiles()
+    APPLOGGER.debug(allfiles)
+    APPLOGGER.debug(len(allfiles))
+
+    APPLOGGER.debug(recordmng.get_freespaces())
+    APPLOGGER.debug(recordmng.have_space())
+    recordmng.lefthrhold = 350
+    recordmng.cycle = True
+    APPLOGGER.debug(recordmng.have_space())
+    APPLOGGER.debug(recordmng.gen_recordfname())
 
 if __name__ == '__main__':
-    RECORDMNG = RecordMng('/home/pi/records/')
-    ALLFILES = RECORDMNG.get_recordfiles()
-    APPLOGGER.debug(ALLFILES)
-    APPLOGGER.debug(len(ALLFILES))
-
-    APPLOGGER.debug(RECORDMNG.get_freespaces())
-    APPLOGGER.debug(RECORDMNG.have_space())
-    RECORDMNG.lefthrhold = 350
-    RECORDMNG.cycle = True
-    APPLOGGER.debug(RECORDMNG.have_space())
-    APPLOGGER.debug(RECORDMNG.gen_recordfname())
+    __test()
 
