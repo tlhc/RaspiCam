@@ -76,6 +76,7 @@ def main():
         http_port = 8080
         if local_ip == '':
             raise AppException('local ip is empty')
+        # TODO move cfg to hyserve also can start service alone
         hyserve.setservices('httpserver', httpserve, (local_ip, http_port, cfg))
         hyserve.setservices('tcpserver', tcpserve, (local_ip, tcpctl_port, cfg))
         hyserve.serve()
