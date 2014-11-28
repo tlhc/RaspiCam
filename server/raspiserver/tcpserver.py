@@ -28,6 +28,7 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
         self.recmng = self.server.recmng
         self.clientcmd_start = 'start'
         self.clientcmd_stop = 'stop'
+        self.clientcmd_record = 'record'
         SocketServer.BaseRequestHandler.__init__(self, request,
                                                  client_address, server)
 
@@ -131,6 +132,7 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
                 self.vvpmng.start()
         finally:
             self.vvpmng.releaselock()
+        self.request.sendall(self.vvpmng.process_cmd.cmd())
 
     def __record(self):
         """ record video file """
@@ -168,8 +170,8 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
             else:
                 self.vvpmng.start()
         finally:
-            self.request.sendall(self.vvpmng.process_cmd.cmd())
             self.vvpmng.releaselock()
+        self.request.sendall(self.vvpmng.process_cmd.cmd())
 
 
     def __process_req(self, data):

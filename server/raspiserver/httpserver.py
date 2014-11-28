@@ -209,8 +209,11 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def do_POST(self):
         """ POST """
         APPLOGGER.debug(self.path)
-        _environ = {'REQUEST_METHOD': 'POST',
-                    'CONTENT_TYPE': self.headers['Content-Type'],}
+        try:
+            _environ = {'REQUEST_METHOD': 'POST',
+                        'CONTENT_TYPE': self.headers['Content-Type'],}
+        except KeyError:
+            _environ = {}
         form = cgi.FieldStorage(fp=self.rfile,
                                 headers=self.headers,
                                 environ=_environ)
