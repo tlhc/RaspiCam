@@ -7,29 +7,29 @@ import os
 import sys
 import signal
 import threading
-from utils import AppException
-from utils import get_local_ip
-from utils import ConfigReader
-from logger import APPLOGGER
-from tcpserver import tcpserve
-from httpserver import httpserve
-from processmng import VideoProcessMng
+from raspiserver.utils import AppException
+from raspiserver.utils import get_local_ip
+from raspiserver.utils import ConfigReader
+from raspiserver.logger import APPLOGGER
+from raspiserver.tcpserver import tcpserve
+from raspiserver.httpserver import httpserve
+from raspiserver.processmng import VideoProcessMng
+from raspiserver.recordmng import RecordMng
 
 def signal_handler(signals, frame):
     """ handle ctrl -c """
     _, _ = signals, frame
+    if PROCESSMNG == None:
+        APPLOGGER.info('Process control object is None')
+        return
     APPLOGGER.info('server exiting..')
-    # TODO fix this!!!!
-    cfg_parser = ConfigReader('./config/raspicam.cfg')
-    cfg = cfg_parser.parser()
-    vvpmng = VideoProcessMng(cfg.video)
-    vvpmng.getlock()
+    PROCESSMNG.getlock()
     try:
-        if vvpmng.isset():
-            if vvpmng.isrun():
-                os.killpg(vvpmng.currpid(), signal.SIGTERM)
+        if PROCESSMNG.isset():
+            if PROCESSMNG.isrun():
+                os.killpg(PROCESSMNG.currpid(), signal.SIGTERM)
     finally:
-        vvpmng.releaselock()
+        PROCESSMNG.releaselock()
 
     APPLOGGER.info('shutdown complete')
     sys.exit(0)
@@ -68,6 +68,10 @@ def main():
     config_path = './config/raspicam.cfg'
     cfg_parser = ConfigReader(config_path)
     cfg = cfg_parser.parser()
+    recmng = RecordMng(cfg.record)
+    vvpmng = VideoProcessMng(cfg.video)
+    global PROCESSMNG
+    PROCESSMNG = vvpmng
     hyserve = HybirdServer()
     # you can start tcp server or http server
     try:
@@ -76,13 +80,15 @@ def main():
         http_port = 8080
         if local_ip == '':
             raise AppException('local ip is empty')
-        # TODO move cfg to hyserve also can start service alone
-        hyserve.setservices('httpserver', httpserve, (local_ip, http_port, cfg))
-        hyserve.setservices('tcpserver', tcpserve, (local_ip, tcpctl_port, cfg))
+        hyserve.setservices('httpserver', httpserve, \
+                (local_ip, http_port, cfg, recmng, vvpmng))
+        hyserve.setservices('tcpserver', tcpserve, \
+                (local_ip, tcpctl_port, cfg, recmng, vvpmng))
         hyserve.serve()
     except AppException as ex:
         APPLOGGER.error(ex)
 
 if __name__ == '__main__':
+    PROCESSMNG = None
     signal.signal(signal.SIGINT, signal_handler)
     main()

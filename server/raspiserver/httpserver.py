@@ -10,18 +10,16 @@ import socket
 import threading
 import SocketServer
 import BaseHTTPServer
-from logger import APPLOGGER
-from utils import get_local_ip
-from utils import AppException
-from processmng import VideoProcessMng
-
+from raspiserver.logger import APPLOGGER
+from raspiserver.utils import AppException
 
 class HttpCtlServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
     """ ThreadedHTTPServer """
-    def __init__(self, server_address, RequestHandler, cfg):
+    def __init__(self, server_address, RequestHandler, cfg, recmng, vvpmng):
         self.allow_reuse_address = True
         self.cfg = cfg
-        self.vvpmng = VideoProcessMng(self.cfg.video)
+        self.vvpmng = vvpmng
+        self.recmng = recmng
         BaseHTTPServer.HTTPServer.__init__(self, server_address, RequestHandler)
 
 class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
@@ -29,6 +27,7 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     def __init__(self, request, client_address, server):
         self.server = server
         self.vvpmng = self.server.vvpmng
+        self.recmng = self.server.recmng
         BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, request,
                                                        client_address, server)
     def __sendmsg(self, code, msg):
@@ -37,6 +36,7 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_header('Content-type', 'text/html')
         self.end_headers()
         self.wfile.write(msg)
+
     def do_GET(self):
         """ GET """
         if self.path == '/':
@@ -166,6 +166,46 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         finally:
             self.vvpmng.releaselock()
 
+    def __record(self, form):
+        """ record video """
+        _ = form
+        recfname = ''
+        can_rec = False
+        self.recmng.getlock()
+        try:
+            if self.recmng.have_space() or self.recmng.cycle == True:
+                recfname = self.recmng.gen_recordfname()
+                if recfname == '':
+                    raise AppException('record file name is null')
+                can_rec = True
+            else:
+                raise AppException('no space to record')
+        except AppException as ex:
+            APPLOGGER.error(ex)
+        finally:
+            self.recmng.releaselock()
+
+        if not can_rec:
+            return
+
+        self.vvpmng.getlock()
+        self.vvpmng.process_cmd.record = True
+        self.vvpmng.process_cmd.recordfname = recfname
+        APPLOGGER.debug(self.vvpmng.process_cmd.cmd())
+        try:
+            if not self.vvpmng.isset():
+                self.vvpmng.start()
+                return
+            if self.vvpmng.isrun():
+                self.vvpmng.stop()
+                self.vvpmng.setprocess(None)
+                self.vvpmng.start()
+            else:
+                self.vvpmng.start()
+        finally:
+            self.__sendmsg(200, 'record start')
+            self.vvpmng.releaselock()
+
     def do_POST(self):
         """ POST """
         APPLOGGER.debug(self.path)
@@ -186,7 +226,7 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.send_response(503)
             self.end_headers()
 
-def httpserve(ipaddr, serve_port, cfg):
+def httpserve(ipaddr, serve_port, cfg, recmng, vvpmng):
     """ httpserve """
     try:
         if ipaddr is '':
@@ -204,7 +244,8 @@ def httpserve(ipaddr, serve_port, cfg):
     APPLOGGER.info('Server Up IP=%s PORT=%s', ipaddr, serve_port)
     server = None
     try:
-        server = HttpCtlServer((ipaddr, serve_port), HttpCtlHandler, cfg)
+        server = HttpCtlServer((ipaddr, serve_port), \
+                HttpCtlHandler, cfg, recmng, vvpmng)
     except socket.error as ex:
         APPLOGGER.error(ex)
         sys.exit(1)
@@ -215,12 +256,17 @@ def httpserve(ipaddr, serve_port, cfg):
 
 def __test():
     """ test function """
-    from utils import ConfigReader
+    from raspiserver.utils import ConfigReader
+    from raspiserver.recordmng import RecordMng
+    from raspiserver.utils import get_local_ip
+    from raspiserver.processmng import VideoProcessMng
     config_parser = ConfigReader('./config/raspicam.cfg')
     cfg = config_parser.parser()
     server, port = get_local_ip(), 8080
-    httpserve(server, port, cfg)
+    recmng = RecordMng(cfg.record)
+    vvpmng = VideoProcessMng(cfg.video)
+    httpserve(server, port, cfg, recmng, vvpmng)
 
 if __name__ == '__main__':
+    # run test python -m raspiserver.httpserver
     __test()
-

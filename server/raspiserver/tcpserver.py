@@ -7,20 +7,16 @@ import sys
 import socket
 import threading
 import SocketServer
-from logger import APPLOGGER
-from utils import AppException
-from utils import get_local_ip
-from utils import ConfigReader
-from recordmng import RecordMng
-from processmng import VideoProcessMng
+from raspiserver.logger import APPLOGGER
+from raspiserver.utils import AppException
 
 class TcpCtlServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     """ TCPServer """
-    def __init__(self, server_address, RequestHandler, cfg):
+    def __init__(self, server_address, RequestHandler, cfg, recmng, vvpmng):
         self.allow_reuse_address = True
         self.cfg = cfg
-        self.vvpmng = VideoProcessMng(self.cfg.video)
-        self.recmng = RecordMng(self.cfg.record)
+        self.vvpmng = vvpmng
+        self.recmng = recmng
         SocketServer.TCPServer.__init__(self, server_address, RequestHandler)
 
 class TcpCtlHandler(SocketServer.BaseRequestHandler):
@@ -198,7 +194,7 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
         else:
             APPLOGGER.error('request callback error')
 
-def tcpserve(ipaddr, serve_port, cfg):
+def tcpserve(ipaddr, serve_port, cfg, recmng, vvpmng):
     """ tcpserve """
     try:
         if ipaddr is '':
@@ -211,7 +207,7 @@ def tcpserve(ipaddr, serve_port, cfg):
     host, port = ipaddr, int(serve_port)
     server = None
     try:
-        server = TcpCtlServer((host, port), TcpCtlHandler, cfg)
+        server = TcpCtlServer((host, port), TcpCtlHandler, cfg, recmng, vvpmng)
     except socket.error as ex:
         APPLOGGER.error(ex)
         sys.exit(1)
@@ -223,11 +219,17 @@ def tcpserve(ipaddr, serve_port, cfg):
 
 def __test():
     """ test function """
+    from raspiserver.recordmng import RecordMng
+    from raspiserver.utils import ConfigReader
+    from raspiserver.utils import get_local_ip
+    from raspiserver.processmng import VideoProcessMng
     server, port = get_local_ip(), 9999
     config_path = './config/raspicam.cfg'
     cfg_parser = ConfigReader(config_path)
     cfg = cfg_parser.parser()
-    tcpserve(server, port, cfg)
+    recmng = RecordMng(cfg.record)
+    vvpmng = VideoProcessMng(cfg.video)
+    tcpserve(server, port, cfg, recmng, vvpmng)
 
 if __name__ == '__main__':
     __test()

@@ -6,12 +6,13 @@
 from os import listdir
 from os import statvfs, remove, makedirs
 from os.path import isdir, join, isfile, exists, getctime, getsize
-from logger import APPLOGGER
 from time import gmtime
 from time import sleep
-from utils import Singleton
-from utils import AppException
 from threading import Lock, Thread
+from raspiserver.utils import Singleton
+from raspiserver.utils import AppException
+from raspiserver.logger import APPLOGGER
+
 
 class RecordMng(object):
     """ record video file manager """
@@ -164,7 +165,7 @@ class RecordMng(object):
 
 def __test():
     """ test func """
-    from utils import ConfigReader
+    from raspiserver.utils import ConfigReader
     cfg_parser = ConfigReader('./config/raspicam.cfg')
     cfg = cfg_parser.parser()
     recordmng = RecordMng(cfg.record)

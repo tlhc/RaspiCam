@@ -3,11 +3,12 @@
 
 """ utils for RaspiCam """
 
-from logger import APPLOGGER
 from os.path import exists, isfile
 import netifaces
 from ConfigParser import Error as ConfigError
 from ConfigParser import ConfigParser
+from threading import Lock
+from raspiserver.logger import APPLOGGER
 
 def get_local_ip():
     """ get local ip address """
@@ -31,6 +32,20 @@ class Singleton(type):
             cls._instances[cls] = \
                     super(Singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
+
+class SingletonMixin(object):
+    """ Singleton thread safe """
+    __singleton_lock = Lock()
+    __singleton_instance = None
+
+    @classmethod
+    def instance(cls):
+        """ get instance """
+        if not cls.__singleton_instance:
+            with cls.__singleton_lock:
+                if not cls.__singleton_instance:
+                    cls.__singleton_instance = cls()
+        return cls.__singleton_instance
 
 class VideoCfg(object):
     """ video cfg """

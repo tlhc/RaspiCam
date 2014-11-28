@@ -3,7 +3,7 @@
 
 """ video cmd generator """
 
-from logger import APPLOGGER
+from raspiserver.logger import APPLOGGER
 
 class RaspvidCmd(object):
     """ opt the cmd str """
@@ -50,7 +50,7 @@ class RaspvidCmd(object):
 
 def __test():
     """ test function """
-    from utils import ConfigReader
+    from raspiserver.utils import ConfigReader
     cfg_parser = ConfigReader('./config/raspicam.cfg')
     cfg = cfg_parser.parser()
     videocmd = RaspvidCmd(cfg.video)
