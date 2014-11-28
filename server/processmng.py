@@ -11,7 +11,6 @@ from logger import APPLOGGER
 from videocmd import RaspvidCmd
 from utils import Singleton
 
-
 class VideoProcessMng(object):
     """ VideoProcessMng ensure one video process in thread """
     __metaclass__ = Singleton

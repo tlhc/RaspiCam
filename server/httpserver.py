@@ -16,14 +16,21 @@ from utils import AppException
 from processmng import VideoProcessMng
 
 
+class HttpCtlServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
+    """ ThreadedHTTPServer """
+    def __init__(self, server_address, RequestHandler, cfg):
+        self.allow_reuse_address = True
+        self.cfg = cfg
+        self.vvpmng = VideoProcessMng(self.cfg.video)
+        BaseHTTPServer.HTTPServer.__init__(self, server_address, RequestHandler)
+
 class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     """ HttpHandler for GET and POST """
     def __init__(self, request, client_address, server):
         self.server = server
-        self.vvpmng = VideoProcessMng(self.server.cfg.video)
+        self.vvpmng = self.server.vvpmng
         BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, request,
                                                        client_address, server)
-
     def __sendmsg(self, code, msg):
         """ send msg to client """
         self.send_response(code)
@@ -178,14 +185,6 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             APPLOGGER.debug(str(form))
             self.send_response(503)
             self.end_headers()
-
-class HttpCtlServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
-    """ ThreadedHTTPServer """
-    def __init__(self, server_address, RequestHandler, cfg):
-        self.allow_reuse_address = True
-        self.cfg = cfg
-        BaseHTTPServer.HTTPServer.__init__(self, server_address, RequestHandler)
-
 
 def httpserve(ipaddr, serve_port, cfg):
     """ httpserve """

@@ -19,6 +19,8 @@ class TcpCtlServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     def __init__(self, server_address, RequestHandler, cfg):
         self.allow_reuse_address = True
         self.cfg = cfg
+        self.vvpmng = VideoProcessMng(self.cfg.video)
+        self.recmng = RecordMng(self.cfg.record)
         SocketServer.TCPServer.__init__(self, server_address, RequestHandler)
 
 class TcpCtlHandler(SocketServer.BaseRequestHandler):
@@ -26,8 +28,8 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
     def __init__(self, request, client_address, server):
         self.server = server
         self.maxbuf = 2048
-        self.vvpmng = VideoProcessMng(self.server.cfg.video)
-        self.recmng = RecordMng(self.server.cfg.record)
+        self.vvpmng = self.server.vvpmng
+        self.recmng = self.server.recmng
         self.clientcmd_start = 'start'
         self.clientcmd_stop = 'stop'
         SocketServer.BaseRequestHandler.__init__(self, request,
