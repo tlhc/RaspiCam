@@ -19,6 +19,7 @@ class TCPServerTest(TestCase):
     def setUp(self):
         self.test_ipaddr = get_local_ip()
         self.test_server_port = 9999
+        # setup once
         if not self.IsSetup:
             self.setup_class()
             self.testthr = None
@@ -35,6 +36,7 @@ class TCPServerTest(TestCase):
                 args=(server, port, cfg, recmng, vvpmng))
         self.testthr.setDaemon(True)
         self.testthr.start()
+        sleep(5)
 
     def tearDown(self):
         pass
@@ -58,6 +60,7 @@ class TCPServerTest(TestCase):
         cfg = config_parser.parser()
         vvpmng = VideoProcessMng(cfg.video)
         return vvpmng.process_cmd.cmd()
+
     def test_get(self):
         """ get command test """
         recvmsg = self.__sendmsg('get')
@@ -69,31 +72,40 @@ class TCPServerTest(TestCase):
         recvmsg = self.__sendmsg('start')
         process_cmd = self.__get_process_cmd()
         # self.assertEqual(recvmsg, process_cmd)
+        self.assertTrue(recvmsg == 'start|0' or recvmsg == 'start|1' or \
+                recvmsg == process_cmd, True)
         sleep(5)
     def test_tcp_stop(self):
         """ test tcp stop command """
         recvmsg = self.__sendmsg('stop')
-        # self.assertEqual(recvmsg, 'stop|1')
+        self.assertEqual(recvmsg, 'stop|1')
     def test_tcp_change(self):
         """ test tcp change command """
-        cmd_str = ('fps=30,brightness=50,bitrate=4500000,'
+        # start first
+        recvmsg = self.__sendmsg('start')
+        process_cmd = self.__get_process_cmd()
+        self.assertEqual(recvmsg, process_cmd)
+        cmd_str = ('fps=25,brightness=50,bitrate=4500000,'
                    'width=768,height=1280')
         cmd_str = 'change|' + cmd_str
         print cmd_str
         recvmsg = self.__sendmsg(cmd_str)
         process_cmd = self.__get_process_cmd()
-        # self.assertEqual(recvmsg, process_cmd)
+        self.assertEqual(recvmsg, process_cmd)
         sleep(5)
         recvmsg = self.__sendmsg('stop')
-        # self.assertEqual(recvmsg, 'stop|1')
+        self.assertEqual(recvmsg, 'stop|1')
+        sleep(5)
     def test_tcp_record(self):
         """ test record command """
+        self.__sendmsg('start')
         recvmsg = self.__sendmsg('record')
         process_cmd = self.__get_process_cmd()
-        # self.assertEqual(recvmsg, process_cmd)
+        self.assertEqual(recvmsg, process_cmd)
         sleep(5)
         recvmsg = self.__sendmsg('stop')
-        # self.assertEqual(recvmsg, 'stop|1')
+        self.assertEqual(recvmsg, 'stop|1')
+        sleep(5)
 
 if __name__ == '__main__':
     main()
