@@ -2,11 +2,17 @@
 # coding:utf-8
 
 """ record mng test """
+
 from unittest import TestCase, main
+from raspiserver.recordmng import RecordMng
+from raspiserver.utils import ConfigReader
 
 class RecordMngTest(TestCase):
+    """ record manager test """
     def setUp(self):
-        pass
+        cfg_parser = ConfigReader('./config/raspicam.cfg')
+        cfg = cfg_parser.parser()
+        self.recordmng = RecordMng(cfg.record)
     def tearDown(self):
         pass
     def test_record_start(self):

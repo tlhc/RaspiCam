@@ -8,7 +8,8 @@ from raspiserver.processmng import VideoProcessMng
 from raspiserver.utils import ConfigReader
 from time import sleep
 
-class VideoCMDTest(TestCase):
+class ProcessMngTest(TestCase):
+    """ test process manager """
     def setUp(self):
         """ setup """
         config_parser = ConfigReader('/home/pi/server/config/raspicam.cfg')
