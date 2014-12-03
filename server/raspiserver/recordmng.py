@@ -175,7 +175,7 @@ def __test():
 
     APPLOGGER.debug(recordmng.get_freespaces())
     APPLOGGER.debug(recordmng.have_space())
-    recordmng.lefthrhold = 350
+    recordmng.lefthrhold = 330
     recordmng.cycle = True
     APPLOGGER.debug(recordmng.have_space())
     APPLOGGER.debug(recordmng.gen_recordfname())

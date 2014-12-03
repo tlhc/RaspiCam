@@ -257,7 +257,7 @@ def httpserve(ipaddr, serve_port, cfg, recmng, vvpmng):
     else:
         APPLOGGER.error('http server start error')
 
-def __test():
+def __run():
     """ test function """
     from raspiserver.utils import ConfigReader
     from raspiserver.recordmng import RecordMng
@@ -272,4 +272,4 @@ def __test():
 
 if __name__ == '__main__':
     # run test python -m raspiserver.httpserver
-    __test()
+    __run()

@@ -219,7 +219,7 @@ def tcpserve(ipaddr, serve_port, cfg, recmng, vvpmng):
     else:
         raise AppException('server start err')
 
-def __test():
+def __run():
     """ test function """
     from raspiserver.recordmng import RecordMng
     from raspiserver.utils import ConfigReader
@@ -234,4 +234,4 @@ def __test():
     tcpserve(server, port, cfg, recmng, vvpmng)
 
 if __name__ == '__main__':
-    __test()
+    __run()

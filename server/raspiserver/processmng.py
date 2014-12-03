@@ -54,21 +54,3 @@ class VideoProcessMng(object):
         if self.isset() and self.isrun():
             os.killpg(self.__vvprocess.pid, signal.SIGTERM)
             APPLOGGER.info('send video process stoped signal')
-
-def __test():
-    """ test function """
-    from raspiserver.utils import ConfigReader
-    cfg_parser = ConfigReader('./config/raspicam.cfg')
-    cfg = cfg_parser.parser()
-    processmng = VideoProcessMng(cfg.video)
-    processmng.getlock()
-    processmng.start()
-    processmng.releaselock()
-    from time import sleep
-    sleep(5)
-    processmng.getlock()
-    processmng.stop()
-    processmng.releaselock()
-
-if __name__ == '__main__':
-    __test()
