@@ -144,7 +144,7 @@
       <x>670</x>
       <y>260</y>
       <width>211</width>
-      <height>141</height>
+      <height>151</height>
      </rect>
     </property>
     <property name="title">
@@ -156,7 +156,7 @@
        <x>10</x>
        <y>50</y>
        <width>194</width>
-       <height>62</height>
+       <height>95</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
@@ -185,6 +185,13 @@
        <widget class="QPushButton" name="btn_remoteRcd">
         <property name="text">
          <string>R-Record</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QPushButton" name="btn_getrecord">
+        <property name="text">
+         <string>GetRecord</string>
         </property>
        </widget>
       </item>

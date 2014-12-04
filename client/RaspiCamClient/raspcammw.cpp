@@ -1,7 +1,7 @@
-
 #include "raspcammw.h"
 #include "ui_raspcammw.h"
 #include "tcprequest.h"
+#include "dlgrecord.h"
 
 
 
@@ -16,7 +16,6 @@ RaspCamMW::RaspCamMW(QWidget *parent) :
 
 RaspCamMW::~RaspCamMW()
 {
-    delete ui;
     if(_vview != NULL) {
         if(_vview->isStart()) {
             _vview->stop();
@@ -29,6 +28,7 @@ RaspCamMW::~RaspCamMW()
     if(scan != NULL) {
         delete scan;
     }
+    delete ui;
 }
 
 void RaspCamMW::_extUISetUp() {
@@ -45,6 +45,7 @@ void RaspCamMW::_extUISetUp() {
     ui->le_height->setEnabled(false);
     ui->le_width->setEnabled(false);
     ui->btn_remoteRcd->setEnabled(false);
+    ui->btn_getrecord->setEnabled(false);
 }
 
 void RaspCamMW::_exDataSetUp() {
@@ -55,6 +56,7 @@ void RaspCamMW::_exDataSetUp() {
     _processtimer.setInterval(1000);
     connect(&_processtimer, SIGNAL(timeout()), this, SLOT(drawprocess()));
     _cntdown_msec = 5000;
+    _ctlport = 9999;
 }
 
 QString RaspCamMW::_getlecontant(QLineEdit *clts, QString orgkey) {
@@ -154,14 +156,18 @@ void RaspCamMW::recvmsg(QString msg) {
     ui->le_fps->setEnabled(true);
     ui->le_height->setEnabled(true);
     ui->le_width->setEnabled(true);
+    ui->btn_getrecord->setEnabled(true);
 
 
     //verify in netscaner so no need to verify here
     QStringList _tmplist = msg.split(":");
-    QHostAddress address(_tmplist.at(0));
-    ctlc = new ControlClient(address, 9999); //ctl port
-    connect(ctlc, SIGNAL(routeOut(QMap<QString,QString>)),
-            this, SLOT(recvvcmds(QMap<QString,QString>)));
+    _saddr = QHostAddress(_tmplist.at(0));
+    if(!_saddr.isNull()) {
+        ctlc = new ControlClient(_saddr, 9999); //ctl port
+        connect(ctlc, SIGNAL(routeOut(QMap<QString,QString>)),
+                this, SLOT(recvvcmds(QMap<QString,QString>)));
+    }
+
 }
 
 void RaspCamMW::recvvcmds(QMap<QString, QString> params) {
@@ -213,7 +219,9 @@ void RaspCamMW::drawprocess() {
 }
 
 void RaspCamMW::on_btn_confirm_clicked() {
-    ctlc->change(_collectcmd());
+    if(ctlc != NULL) {
+        ctlc->change(_collectcmd());
+    }
     if(_vview->isStart()) {
         _vview->stop();
     }
@@ -235,4 +243,13 @@ void RaspCamMW::on_btn_remoteRcd_clicked() {
         _processtime.restart();
         QTimer::singleShot(_cntdown_msec, this, SLOT(laterstart()));
     }
+}
+
+void RaspCamMW::on_btn_getrecord_clicked() {
+    DlgRecord *dlg = new DlgRecord(this);
+    if (!_saddr.isNull()) {
+        dlg->setData(_saddr, _ctlport);
+        dlg->exec();
+    }
+
 }

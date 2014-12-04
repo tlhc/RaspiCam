@@ -17,15 +17,18 @@ SOURCES += main.cpp\
     videoview.cpp \
     tcprequest.cpp \
     netscaner.cpp \
-    controlclient.cpp
+    controlclient.cpp \
+    dlgrecord.cpp
 
 HEADERS  += raspcammw.h \
     videoview.h \
     tcprequest.h \
     netscaner.h \
-    controlclient.h
+    controlclient.h \
+    dlgrecord.h
 
-FORMS    += raspcammw.ui
+FORMS    += raspcammw.ui \
+    dlgrecord.ui
 
 
 unix:LIBS += -lvlc

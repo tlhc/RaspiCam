@@ -9,7 +9,7 @@ import sys
 
 def main():
     """ client test """
-    host, port = "192.168.1.105", 9999
+    host, port = "192.168.1.108", 9999
     data = " ".join(sys.argv[1:])
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:

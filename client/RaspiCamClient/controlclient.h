@@ -17,8 +17,10 @@ public:
     void stop();
     void change(QString params);
     void record();
+    void get_records();
 signals:
     void routeOut(QMap<QString, QString>);
+    void routeOut(QString);
 public slots:
     void servermsg(QString msg);
 private:

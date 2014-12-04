@@ -36,6 +36,8 @@ private slots:
 
     void on_btn_remoteRcd_clicked();
 
+    void on_btn_getrecord_clicked();
+
 private:
     void _extUISetUp();
     void _exDataSetUp();
@@ -48,6 +50,8 @@ private:
     ControlClient *ctlc;
     QTimer _processtimer;
     QTime _processtime;
+    QHostAddress _saddr;
+    quint16 _ctlport;
     int _cntdown_msec;
     QMap<QString, QString> orgval;
 };

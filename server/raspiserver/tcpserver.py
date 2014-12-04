@@ -173,6 +173,16 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
             self.vvpmng.releaselock()
         self.request.sendall(self.vvpmng.process_cmd.cmd())
 
+    def __get_records(self):
+        """ get record files """
+        self.recmng.getlock()
+        try:
+            reclist = self.recmng.get_recordfiles()
+        finally:
+            msg = 'records|'
+            msg += ','.join(reclist)
+            self.request.sendall(msg)
+            self.recmng.releaselock()
 
     def __process_req(self, data):
         """ process req """
