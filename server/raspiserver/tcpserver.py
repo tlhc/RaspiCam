@@ -184,6 +184,28 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
             self.request.sendall(msg)
             self.recmng.releaselock()
 
+    def __rm_records(self, data):
+        """ remove video record """
+        data = data.lstrip('rm_records|')
+        data = data.strip('\n')
+        allfiles = self.recmng.get_recordfiles()
+        if data not in allfiles:
+            return
+        self.recmng.getlock()
+        ret = -1
+        try:
+            ret = self.recmng.rm_recordfiles(data)
+        finally:
+            if ret == 0 or ret == 1:
+                APPLOGGER.info('rm success')
+            elif ret == -1:
+                APPLOGGER.info('rm failed')
+            reclist = self.recmng.get_recordfiles()
+            msg = 'records|'
+            msg += ','.join(reclist)
+            self.request.sendall(msg)
+            self.recmng.releaselock()
+
     def __process_req(self, data):
         """ process req """
         data = data.strip(' \n')

@@ -18,6 +18,7 @@ public:
     void change(QString params);
     void record();
     void get_records();
+    void rm_records(QString params);
 signals:
     void routeOut(QMap<QString, QString>);
     void routeOut(QString);

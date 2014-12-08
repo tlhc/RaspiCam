@@ -5,6 +5,7 @@
 #include <QStringList>
 #include "videoview.h"
 #include "controlclient.h"
+#include <QSignalMapper>
 
 namespace Ui {
 class DlgRecord;
@@ -22,8 +23,8 @@ public:
 private slots:
     void on_btn_refresh_clicked();
     void records(QString records);
-
     void on_tbl_records_cellDoubleClicked(int row, int column);
+    void delclick(int row_id);
 
 private:
     Ui::DlgRecord *ui;
@@ -32,6 +33,7 @@ private:
     void _extUISetUp();
     QStringList reclist;
     VideoView *_vview;
+    QSignalMapper *_mapper;
 };
 
 #endif // DLGRECORD_H

@@ -11,7 +11,8 @@ ControlClient::ControlClient(QHostAddress server, qint16 port, QObject *parent) 
     _request = new TcpRequest(this, 1);
     connect(_request, SIGNAL(sigmsg(QString)), this, SLOT(servermsg(QString)));
     _raspcmd_prefix = "raspivid";
-    _supportcmds << "start" << "stop" << "change" << "record" << "get_records";
+    _supportcmds << "start" << "stop" << "change" << "record" << "get_records"
+                 << "rm_records";
 }
 
 ControlClient::~ControlClient() {
@@ -59,6 +60,10 @@ void ControlClient::record() {
 void ControlClient::get_records()
 {
     _sig_cmd("get_records");
+}
+
+void ControlClient::rm_records(QString params) {
+    _para_cmd("rm_records", params);
 }
 
 
