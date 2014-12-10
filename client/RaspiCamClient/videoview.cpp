@@ -38,7 +38,8 @@ VideoView::~VideoView() {
 void VideoView::start() {
     Q_ASSERT(!_vlcMediaPlayer);
 
-    if(_weburl.length() <= 0 || !_weburl.startsWith("rtsp://")) {
+    if(_weburl.length() <= 0 ||
+       !(_weburl.startsWith("rtsp://") || _weburl.startsWith("http://"))) {
         return;
     }
     libvlc_media_t* vlcMedia = libvlc_media_new_location(_vlcInstance, _weburl.toStdString().c_str());

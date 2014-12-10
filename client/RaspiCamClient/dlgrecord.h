@@ -34,6 +34,8 @@ private:
     QStringList reclist;
     VideoView *_vview;
     QSignalMapper *_mapper;
+    quint16 _vodport;
+    QString _vodprefix;
 };
 
 #endif // DLGRECORD_H

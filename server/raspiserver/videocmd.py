@@ -13,7 +13,7 @@ class RaspvidCmd(object):
         self.bright = cfg.brightness if cfg.brightness != -1 else 50
         # 4.5MBit/s
         self.bitrate = cfg.bitrate if cfg.bitrate != -1 else 4500000
-        self.rtsp_port = 9000
+        self.rtsp_port = cfg.rtsp_port if cfg.rtsp_port != 0 else 9000
         self.width = cfg.width if cfg.width != -1 else 1280
         self.height = cfg.height if cfg.height != -1 else 720
         self.stime = 0         # forever

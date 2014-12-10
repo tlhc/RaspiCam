@@ -60,6 +60,9 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             if self.path.endswith('.css'):
                 mimetype = 'text/css'
                 sendreply = True
+            if self.path.endswith('.mp4'):
+                mimetype = 'video/mp4'
+                sendreply = True
 
             if sendreply == True:
                 # Open the static file requested and send it

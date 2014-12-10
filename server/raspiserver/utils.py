@@ -56,6 +56,7 @@ class VideoCfg(object):
         self.fps = -1
         self.bitrate = -1
         self.brightness = -1
+        self.rtsp_port = 0    #eh... not very well
 
 class RecordCfg(object):
     """ record cfg """
@@ -63,6 +64,13 @@ class RecordCfg(object):
         self.base = ''
         self.cycle = None
         self.fsp_limit = -1
+
+class ServeCfg(object):
+    """ server config """
+    def __init__(self):
+        self.tcp_port = 0
+        self.http_port = 0
+        self.vod_port = 0
 
 class ConfigObject(object):
     """ config object """
@@ -72,6 +80,7 @@ class ConfigObject(object):
         self.video = VideoCfg()
         # record parameters
         self.record = RecordCfg()
+        self.comm_port = ServeCfg()
 
 class ConfigReader(object):
     """ config file reader """
@@ -101,6 +110,9 @@ class ConfigReader(object):
                         if config_parser.has_option('video', 'brightness'):
                             self.__config.video.brightness = \
                                     config_parser.getint('video', 'brightness')
+                        if config_parser.has_option('video', 'rtsp_port'):
+                            self.__config.video.rtsp_port = \
+                                    config_parser.getint('video', 'rtsp_port')
                         if config_parser.has_option('record', 'base'):
                             self.__config.record.base = \
                                     config_parser.get('record', 'base')
@@ -110,6 +122,15 @@ class ConfigReader(object):
                         if config_parser.has_option('record', 'limit'):
                             self.__config.record.fsp_limit = \
                                     config_parser.getint('record', 'limit')
+                        if config_parser.has_option('common', 'tcp_port'):
+                            self.__config.comm_port.tcp_port = \
+                                    config_parser.getint('common', 'tcp_port')
+                        if config_parser.has_option('common', 'http_port'):
+                            self.__config.comm_port.http_port = \
+                                    config_parser.getint('common', 'http_port')
+                        if config_parser.has_option('common', 'vod_port'):
+                            self.__config.comm_port.vod_port = \
+                                    config_parser.getint('common', 'vod_port')
                     except (AppException, ConfigError) as ex:
                         APPLOGGER.error(ex)
             else:

@@ -17,6 +17,7 @@ void DlgRecord::setData(QHostAddress saddr, quint16 port) {
     if(_pctlc == NULL) {
         _pctlc = new ControlClient(saddr, port);
         connect(_pctlc, SIGNAL(routeOut(QString)), this, SLOT(records(QString)));
+        _vodprefix = "http://" + saddr.toString() + ":" + QString::number(_vodport);
     }
 }
 
@@ -73,6 +74,7 @@ void DlgRecord::records(QString records) {
 void DlgRecord::_extDataSetUp() {
     _pctlc = NULL;
     _mapper = new QSignalMapper(this);
+    _vodport = 9001;    //for vod over http
 }
 
 void DlgRecord::_extUISetUp() {
@@ -88,7 +90,12 @@ void DlgRecord::on_tbl_records_cellDoubleClicked(int row, int column) {
     if(_vview->isStart()) {
         _vview->stop();
     }
-    qDebug() << ui->tbl_records->item(row, column)->text();
+    if(!_vodprefix.isEmpty()) {
+        QString weburl = _vodprefix + ui->tbl_records->item(row, column)->text().trimmed();
+        _vview->setWeburl(weburl);
+        _vview->start();
+    }
+
 }
 
 void DlgRecord::delclick(int row_id) {

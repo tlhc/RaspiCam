@@ -15,6 +15,7 @@ from raspiserver.tcpserver import tcpserve
 from raspiserver.httpserver import httpserve
 from raspiserver.processmng import VideoProcessMng
 from raspiserver.recordmng import RecordMng
+from raspiserver.fakevod import vodserve
 
 def signal_handler(signals, frame):
     """ handle ctrl -c """
@@ -76,14 +77,20 @@ def main():
     # you can start tcp server or http server
     try:
         local_ip = get_local_ip()
-        tcpctl_port = 9999
-        http_port = 8080
+        tcpctl_port = cfg.comm_port.tcp_port \
+                if cfg.comm_port.tcp_port != 0 else 9999
+        http_port = cfg.comm_port.http_port \
+                if cfg.comm_port.http_port != 0 else 8080
+        vod_port = cfg.comm_port.vod_port \
+                if cfg.comm_port.vod_port != 0 else 9001
         if local_ip == '':
             raise AppException('local ip is empty')
         hyserve.setservices('httpserver', httpserve, \
                 (local_ip, http_port, cfg, recmng, vvpmng))
         hyserve.setservices('tcpserver', tcpserve, \
                 (local_ip, tcpctl_port, cfg, recmng, vvpmng))
+        hyserve.setservices('vodserver', vodserve, \
+                (local_ip, vod_port))
         hyserve.serve()
     except AppException as ex:
         APPLOGGER.error(ex)
