@@ -158,7 +158,7 @@ void DlgRecord::setplaypos() {
     int org_sl_pos = ui->video_silder->sliderPosition();
     ui->video_silder->setSliderPosition(currpos * len);
     /*fix libvlc can't get pos 1.0 when finish play*/
-    if(currpos > 0.9 && (int)(currpos * len) <= org_sl_pos) {
+    if((int)(currpos * len) <= org_sl_pos) {
         _processtimer->stop();
         _vview->stop();
         ui->video_silder->setSliderPosition(0);
