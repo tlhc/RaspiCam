@@ -36,6 +36,7 @@ private:
     QSignalMapper *_mapper;
     quint16 _vodport;
     QString _vodprefix;
+    static bool _fLess(QString file1, QString file2);
 };
 
 #endif // DLGRECORD_H

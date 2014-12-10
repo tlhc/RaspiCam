@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # coding:utf-8
+# author TL
 
 """ vod server base vlc vod over http feature
     JUST FOR TCP Server USE"""
 
+import sys
 import BaseHTTPServer
 from os.path import isfile, exists
 from socket import error as sockerror
@@ -12,13 +14,13 @@ from SocketServer import ThreadingMixIn
 from raspiserver.logger import APPLOGGER
 
 
-class VodServer(ThreadingMixIn, BaseHTTPServer.HTTPServer):
+class VODServer(ThreadingMixIn, BaseHTTPServer.HTTPServer):
     """ vod server over http """
     def __init__(self, server_address, RequestHandler):
         BaseHTTPServer.HTTPServer.__init__(self, server_address, RequestHandler)
 
 
-class VodReqHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+class VODReqHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     """ vod request handler """
     def __init__(self, request, client_address, server):
         self.server = server
@@ -62,10 +64,10 @@ def vodserve(ipaddr, serve_port):
     APPLOGGER.info('Server Up IP=%s PORT=%s', ipaddr, serve_port)
     server = None
     try:
-        server = VodServer((ipaddr, serve_port), VodReqHandler)
+        server = VODServer((ipaddr, serve_port), VODReqHandler)
     except sockerror as ex:
         APPLOGGER.error(ex)
-        exit(1)
+        sys.exit(1)
     if server:
         server.serve_forever()
     else:

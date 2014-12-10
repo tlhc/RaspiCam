@@ -251,5 +251,5 @@ void RaspCamMW::on_btn_getrecord_clicked() {
         dlg->setData(_saddr, _ctlport);
         dlg->exec();
     }
-
+    delete dlg;
 }

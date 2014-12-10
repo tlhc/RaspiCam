@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # coding:utf-8
+# author TL
 
 """ record manager """
 
@@ -148,6 +149,7 @@ class RecordMng(object):
 
     def __watch_dog(self):
         """ watch the free space """
+        # TODO: vod lock
         while 1:
             self.getlock()
             try:
