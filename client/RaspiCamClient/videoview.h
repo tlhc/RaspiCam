@@ -23,6 +23,9 @@ public:
     QSize sizeHint() const;
     QString weburl() const;
     void setWeburl(const QString &weburl);
+    int getvideolen();
+    void setposition(float pos);
+    float getposition() const;
 
 private:
     void closeEvent(QCloseEvent* event);

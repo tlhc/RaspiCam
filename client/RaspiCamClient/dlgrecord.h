@@ -6,6 +6,7 @@
 #include "videoview.h"
 #include "controlclient.h"
 #include <QSignalMapper>
+#include <QTimer>
 
 namespace Ui {
 class DlgRecord;
@@ -25,6 +26,7 @@ private slots:
     void records(QString records);
     void on_tbl_records_cellDoubleClicked(int row, int column);
     void delclick(int row_id);
+    void setplaypos();
 
 private:
     Ui::DlgRecord *ui;
@@ -36,6 +38,7 @@ private:
     QSignalMapper *_mapper;
     quint16 _vodport;
     QString _vodprefix;
+    QTimer *_processtimer;
     static bool _fLess(QString file1, QString file2);
 };
 

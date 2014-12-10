@@ -5,6 +5,7 @@
 #include <QPushButton>
 #include <QDateTime>
 
+
 DlgRecord::DlgRecord(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::DlgRecord)
@@ -39,6 +40,10 @@ DlgRecord::~DlgRecord()
         delete _mapper;
         _mapper = NULL;
     }
+    if(_processtimer->isActive()) {
+        _processtimer->stop();
+    }
+    delete _processtimer;
     delete ui;
 }
 
@@ -77,6 +82,9 @@ void DlgRecord::_extDataSetUp() {
     _pctlc = NULL;
     _mapper = new QSignalMapper(this);
     _vodport = 9001;    //for vod over http
+    _processtimer = new QTimer(this);
+    _processtimer->setInterval(500);
+    connect(_processtimer, SIGNAL(timeout()), this, SLOT(setplaypos()));
 }
 
 void DlgRecord::_extUISetUp() {
@@ -85,6 +93,7 @@ void DlgRecord::_extUISetUp() {
     _vview->setSize(vsize);
     ui->tbl_records->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->tbl_records->horizontalHeader()->setVisible(false);
+    ui->btn_acc_reject->button(QDialogButtonBox::Cancel)->hide();
 }
 
 bool DlgRecord::_fLess(QString file1, QString file2) {
@@ -122,17 +131,36 @@ void DlgRecord::on_tbl_records_cellDoubleClicked(int row, int column) {
     if(_vview->isStart()) {
         _vview->stop();
     }
+    if(_processtimer->isActive()) {
+        _processtimer->stop();
+    }
     if(!_vodprefix.isEmpty()) {
         QString weburl = _vodprefix + ui->tbl_records->item(row, column)->text().trimmed();
         _vview->setWeburl(weburl);
         _vview->start();
     }
-
+    QTimer::singleShot(500, _processtimer, SLOT(start())); /*need time to get video length*/
 }
 
 void DlgRecord::delclick(int row_id) {
     QString filepath = ui->tbl_records->item(row_id, 0)->text();
     if(_pctlc != NULL) {
         _pctlc->rm_records(filepath);
+    }
+}
+
+void DlgRecord::setplaypos() {
+    int len = _vview->getvideolen();
+    ui->video_silder->setMinimum(0);
+    ui->video_silder->setMaximum(len);
+    float currpos = 0.0;
+    currpos = _vview->getposition();
+    int org_sl_pos = ui->video_silder->sliderPosition();
+    ui->video_silder->setSliderPosition(currpos * len);
+    /*fix libvlc can't get pos 1.0 when finish play*/
+    if(currpos > 0.9 && (int)(currpos * len) <= org_sl_pos) {
+        _processtimer->stop();
+        _vview->stop();
+        ui->video_silder->setSliderPosition(0);
     }
 }

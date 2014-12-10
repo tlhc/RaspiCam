@@ -71,7 +71,6 @@ void VideoView::start() {
 #else
 //#error "unsupported platform"
 #endif
-
     libvlc_media_player_play(_vlcMediaPlayer);
     _start = true;
 }
@@ -127,4 +126,25 @@ QString VideoView::weburl() const {
 
 void VideoView::setWeburl(const QString &weburl) {
     _weburl = weburl;
+}
+
+int VideoView::getvideolen() {
+    libvlc_time_t len = -1;
+    if(_vlcMediaPlayer != NULL) {
+        len = libvlc_media_player_get_length(_vlcMediaPlayer);
+    }
+    return (int)len;
+}
+
+void VideoView::setposition(float pos) {
+    if(_vlcMediaPlayer != NULL && (pos >= 0.0 && pos <= 1.0)) {
+        libvlc_media_player_set_position(_vlcMediaPlayer, pos);
+    }
+}
+
+float VideoView::getposition() const {
+    if(_vlcMediaPlayer != NULL) {
+        return libvlc_media_player_get_position(_vlcMediaPlayer);
+    }
+    return -1.0;
 }
