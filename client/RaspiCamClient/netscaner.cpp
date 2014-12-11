@@ -77,7 +77,9 @@ NetScaner::~NetScaner()
 
 void NetScaner::start() {
     for(int i = 0; i < _workerlist.size(); i++) {
-        _thrlist.at(i)->start();
+        if(!_thrlist.at(i)->isRunning()) {
+            _thrlist.at(i)->start();
+        }
     }
 }
 

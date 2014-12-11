@@ -222,6 +222,7 @@ void RaspCamMW::drawprocess() {
     }
 }
 
+
 void RaspCamMW::on_btn_confirm_clicked() {
     if(ctlc != NULL) {
         ctlc->change(_collectcmd());
