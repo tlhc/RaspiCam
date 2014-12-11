@@ -151,25 +151,3 @@ class ConfigReader(object):
         """ set path """
         self.__path = value
     path = property(__get_path, __set_path)
-
-def __test():
-    """ test function """
-    APPLOGGER.debug(get_local_ip())
-    try:
-        raise AppException('test exp')
-    except AppException as ex:
-        APPLOGGER.debug(ex)
-    config = './config/raspicam.cfg'
-    parser = ConfigReader(config)
-    parser.parser()
-    APPLOGGER.debug(parser.config.video.width)
-    APPLOGGER.debug(parser.config.video.height)
-    APPLOGGER.debug(parser.config.video.fps)
-    APPLOGGER.debug(parser.config.video.bitrate)
-    APPLOGGER.debug(parser.config.video.brightness)
-    APPLOGGER.debug(parser.config.record.base)
-    APPLOGGER.debug(parser.config.record.cycle)
-    APPLOGGER.debug(parser.config.record.fsp_limit)
-
-if __name__ == '__main__':
-    __test()

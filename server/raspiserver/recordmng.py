@@ -89,7 +89,8 @@ class RecordMng(object):
 
 
     def have_space(self):
-        """ can record videos if we have enough disk space just pre check """
+        """ can record videos if we have enough disk space
+            just pre run record process check """
         if int(self.get_freespaces()) < self.lefthrhold:
             return False
         return True
