@@ -29,7 +29,6 @@ class VODServer(ThreadingMixIn, BaseHTTPServer.HTTPServer):
     def __init__(self, server_address, RequestHandler):
         BaseHTTPServer.HTTPServer.__init__(self, server_address, RequestHandler)
 
-
 class VODReqHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     """ vod request handler """
     def __init__(self, request, client_address, server):

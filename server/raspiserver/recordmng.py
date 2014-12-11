@@ -156,7 +156,6 @@ class RecordMng(object):
 
     def __watch_dog(self):
         """ watch the free space """
-        # TODO: vod lock
         while 1:
             self.getlock()
             try:
