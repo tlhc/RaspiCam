@@ -3,7 +3,7 @@
 # author TL
 
 """ vod server base vlc vod over http feature
-    JUST FOR TCP Server USE"""
+    JUST FOR TCP Server use"""
 
 import sys
 import BaseHTTPServer
