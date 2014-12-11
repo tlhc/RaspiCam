@@ -26,7 +26,7 @@ public:
     int getvideolen();
     void setposition(float pos);
     float getposition() const;
-    libvlc_state_t getvideostat() const;
+    libvlc_state_t getvideostat() ;
 
 private:
     void closeEvent(QCloseEvent* event);

@@ -149,7 +149,7 @@ float VideoView::getposition() const {
     return -1.0;
 }
 
-libvlc_state_t VideoView::getvideostat() const {
+libvlc_state_t VideoView::getvideostat() {
     if(_vlcMediaPlayer != NULL) {
         return libvlc_media_player_get_state(_vlcMediaPlayer);
     }
