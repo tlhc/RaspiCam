@@ -13,6 +13,7 @@ from threading import Lock, Thread
 from raspiserver.utils import Singleton
 from raspiserver.utils import AppException
 from raspiserver.logger import APPLOGGER
+from raspiserver.fakevod import getvodfile
 
 
 class RecordMng(object):
@@ -81,8 +82,13 @@ class RecordMng(object):
             return float('%.3f' % (getsize(path) / 1024.0 / 1024.0))
         for item in rec_files:
             if self.get_freespaces() < self.lefthrhold:
-                APPLOGGER.debug('relase space is : ' + str(getfsize(item)))
-                remove(item)
+                APPLOGGER.debug(getvodfile())
+                if getvodfile().strip(' ') == item.strip(' '):
+                    APPLOGGER.debug('in use: ' + getvodfile())
+                    continue
+                else:
+                    APPLOGGER.debug('relase space is : ' + str(getfsize(item)))
+                    remove(item)
             else:
                 break
         APPLOGGER.debug('free space is: ' + str(self.get_freespaces()))

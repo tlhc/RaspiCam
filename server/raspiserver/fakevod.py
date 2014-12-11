@@ -13,6 +13,16 @@ from raspiserver.utils import AppException
 from SocketServer import ThreadingMixIn
 from raspiserver.logger import APPLOGGER
 
+VOD_FILE = ''
+
+def getvodfile():
+    """ get the in use video file name """
+    return VOD_FILE
+
+def _setvodfile(filename):
+    """ set vod file in use """
+    global VOD_FILE
+    VOD_FILE = filename
 
 class VODServer(ThreadingMixIn, BaseHTTPServer.HTTPServer):
     """ vod server over http """
@@ -41,6 +51,7 @@ class VODReqHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
             if sendreply == True:
                 # Open the static file requested and send it
+                _setvodfile(self.path)
                 fhandler = open(self.path)
                 self.send_response(200)
                 self.send_header('Content-type', mimetype)
@@ -50,6 +61,8 @@ class VODReqHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             return
         except IOError:
             self.send_error(404, 'File Not Found: %s' % self.path)
+        finally:
+            _setvodfile('')
 
 
 def vodserve(ipaddr, serve_port):
