@@ -1,5 +1,5 @@
-#include "videoview.h"
 #include <QDebug>
+#include "videoview.h"
 
 static const char* vlcArguments[] = {
     "--intf=dummy",
@@ -147,4 +147,11 @@ float VideoView::getposition() const {
         return libvlc_media_player_get_position(_vlcMediaPlayer);
     }
     return -1.0;
+}
+
+libvlc_state_t VideoView::getvideostat() const {
+    if(_vlcMediaPlayer != NULL) {
+        return libvlc_media_player_get_state(_vlcMediaPlayer);
+    }
+    return libvlc_Error;
 }

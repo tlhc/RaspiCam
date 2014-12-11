@@ -1,5 +1,4 @@
 #include "controlclient.h"
-#include <QEventLoop>
 
 
 ControlClient::ControlClient(QHostAddress server, qint16 port, QObject *parent) :

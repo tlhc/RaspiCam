@@ -1,5 +1,5 @@
-#include "raspcammw.h"
 #include <QApplication>
+#include "raspcammw.h"
 
 int main(int argc, char *argv[])
 {

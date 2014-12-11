@@ -1,9 +1,9 @@
-#include "dlgrecord.h"
-#include "ui_dlgrecord.h"
-#include <QDebug>
 #include <QTableWidgetItem>
 #include <QPushButton>
 #include <QDateTime>
+#include <QDebug>
+#include "dlgrecord.h"
+#include "ui_dlgrecord.h"
 
 
 DlgRecord::DlgRecord(QWidget *parent) :
@@ -155,10 +155,10 @@ void DlgRecord::setplaypos() {
     ui->video_silder->setMaximum(len);
     float currpos = 0.0;
     currpos = _vview->getposition();
-    int org_sl_pos = ui->video_silder->sliderPosition();
     ui->video_silder->setSliderPosition(currpos * len);
     /*fix libvlc can't get pos 1.0 when finish play*/
-    if((int)(currpos * len) <= org_sl_pos) {
+    libvlc_state_t status = _vview->getvideostat();
+    if(status == libvlc_Ended || status == libvlc_Stopped || status == libvlc_Error) {
         _processtimer->stop();
         _vview->stop();
         ui->video_silder->setSliderPosition(0);

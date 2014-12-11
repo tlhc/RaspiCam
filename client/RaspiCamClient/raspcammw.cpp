@@ -1,6 +1,6 @@
-#include "raspcammw.h"
-#include "ui_raspcammw.h"
 #include "tcprequest.h"
+#include "ui_raspcammw.h"
+#include "raspcammw.h"
 #include "dlgrecord.h"
 
 

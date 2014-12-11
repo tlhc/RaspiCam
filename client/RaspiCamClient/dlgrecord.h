@@ -3,10 +3,10 @@
 
 #include <QDialog>
 #include <QStringList>
-#include "videoview.h"
-#include "controlclient.h"
 #include <QSignalMapper>
 #include <QTimer>
+#include "videoview.h"
+#include "controlclient.h"
 
 namespace Ui {
 class DlgRecord;
