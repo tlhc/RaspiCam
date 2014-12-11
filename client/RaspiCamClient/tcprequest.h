@@ -23,11 +23,10 @@ private:
     int _iskeep;
 signals:
     void sigmsg(QString msg);
+    void done();
 public slots:
-    void connected();
     void disconnected();
     void readall();
-    void statuschange(QAbstractSocket::SocketState status);
     void error(QAbstractSocket::SocketError error);
 };
 

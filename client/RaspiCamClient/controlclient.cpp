@@ -1,7 +1,6 @@
 #include "controlclient.h"
 
-
-ControlClient::ControlClient(QHostAddress server, qint16 port, QObject *parent) :
+ControlClient::ControlClient(QHostAddress server, quint16 port, QObject *parent) :
     QObject(parent),
     _serveraddr(server),
     _port(port)
@@ -12,6 +11,7 @@ ControlClient::ControlClient(QHostAddress server, qint16 port, QObject *parent) 
     _raspcmd_prefix = "raspivid";
     _supportcmds << "start" << "stop" << "change" << "record" << "get_records"
                  << "rm_records";
+    _dftwaitmsec = 100;
 }
 
 ControlClient::~ControlClient() {
@@ -21,17 +21,9 @@ ControlClient::~ControlClient() {
     }
 }
 
-void ControlClient::start() {
-    _sig_cmd("start");
-}
-
-void ControlClient::stop() {
-    _sig_cmd("stop");
-}
-
 void ControlClient::_sig_cmd(const QString &cmd) {
     if(_supportcmds.contains(cmd)) {
-        if(_request->connectHost(_serveraddr, _port, 100)) {
+        if(_request->connectHost(_serveraddr, _port, _dftwaitmsec)) {
             _request->sendData(cmd.toStdString().c_str());
         }
     }
@@ -42,12 +34,19 @@ void ControlClient::_para_cmd(const QString &prefix, const QString &params) {
         QString cmd = "";
         cmd = prefix + "|";
         cmd += params;
-        if(_request->connectHost(_serveraddr, _port, 100)) {
+        if(_request->connectHost(_serveraddr, _port, _dftwaitmsec)) {
             _request->sendData(cmd.toStdString().c_str());
         }
     }
 }
 
+void ControlClient::start() {
+    _sig_cmd("start");
+}
+
+void ControlClient::stop() {
+    _sig_cmd("stop");
+}
 void ControlClient::change(QString params) {
     _para_cmd("change", params);
 }
@@ -82,8 +81,6 @@ void ControlClient::servermsg(QString msg) {
         }
     }
 }
-
-
 
 QMap<QString, QString> ControlClient::_parsecmd(QString cmdstr) {
     QMap<QString, QString> cmdmap;

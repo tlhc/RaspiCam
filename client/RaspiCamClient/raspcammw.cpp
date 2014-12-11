@@ -163,6 +163,10 @@ void RaspCamMW::recvmsg(QString msg) {
     QStringList _tmplist = msg.split(":");
     _saddr = QHostAddress(_tmplist.at(0));
     if(!_saddr.isNull()) {
+        if (ctlc != NULL) {
+            delete ctlc;
+            ctlc = NULL;
+        }
         ctlc = new ControlClient(_saddr, 9999); //ctl port
         connect(ctlc, SIGNAL(routeOut(QMap<QString,QString>)),
                 this, SLOT(recvvcmds(QMap<QString,QString>)));

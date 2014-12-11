@@ -3,6 +3,7 @@
 #include <QHostAddress>
 #include <QStringList>
 #include <QTimer>
+#include <QEventLoop>
 #include <QDebug>
 #include "netscaner.h"
 
@@ -89,11 +90,15 @@ void NetScaner::error(QString err) {
 }
 
 void NetScaner::getone(QString one) {
-    TcpRequest *vreq = new TcpRequest(this);
-    if(vreq->connectHost(QHostAddress(one), 9999, 100)) {
-        connect(vreq, SIGNAL(sigmsg(QString)), this, SLOT(verityslot(QString)));
-        vreq->sendData("get");
+    QEventLoop loop;
+    TcpRequest vreq;
+    connect(&vreq, SIGNAL(done()), &loop, SLOT(quit()));
+    if(vreq.connectHost(QHostAddress(one), 9999, 100)) {
+        connect(&vreq, SIGNAL(sigmsg(QString)), this, SLOT(verityslot(QString)));
+        vreq.sendData("get");
     }
+    /*when send get command then loop start*/
+    loop.exec();
 }
 
 void NetScaner::verityslot(QString msg) {

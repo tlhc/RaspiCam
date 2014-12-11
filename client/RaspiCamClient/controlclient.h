@@ -11,7 +11,7 @@ class ControlClient : public QObject
 {
     Q_OBJECT
 public:
-    explicit ControlClient(QHostAddress server, qint16 port, QObject *parent = 0);
+    explicit ControlClient(QHostAddress server, quint16 port, QObject *parent = 0);
     ~ControlClient();
     void start();
     void stop();
@@ -28,7 +28,6 @@ private:
     void _sig_cmd(const QString &cmd);
     void _para_cmd(const QString &prefix, const QString &params);
 private:
-
     QMap<QString, QString> _parsecmd(QString cmdstr);
     QString _parsepara(QString para);
     QHostAddress _serveraddr;
@@ -36,6 +35,7 @@ private:
     TcpRequest *_request;
     QString _raspcmd_prefix;
     QStringList _supportcmds;
+    int _dftwaitmsec;
 
 };
 
