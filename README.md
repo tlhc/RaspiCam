@@ -59,7 +59,7 @@ Software:
 
     Server:
 
-    - put server dir in your Rpi(one folder) then
+    - put server dir in your Rpi then
     - cd server
     - python ctlserver.py
 
