@@ -34,8 +34,10 @@ TcpRequest::TcpRequest(QObject *parent, int keep_alive) :
 
 TcpRequest::~TcpRequest() {
     if(_socket != NULL) {
-        delete _socket;
-        _socket = NULL;
+        if(_socket->isOpen()) {
+            _socket->close();
+        }
+        _socket->deleteLater();
     }
 }
 
@@ -101,8 +103,11 @@ void TcpRequest::connected() {
 }
 
 void TcpRequest::disconnected() {
+    if(_socket != NULL) {
+        _socket->abort();
+    }
     if(_iskeep == 0) {
-        _socket->deleteLater();
+        ;
     }
     qDebug() << "disconnected" << _socket->socketDescriptor();
 
