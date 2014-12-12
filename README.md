@@ -40,6 +40,7 @@ Software:
  - support auto discovery Rpi(just push scan button)
  - support start, stop control
  - support record and remote-record control
+ - support video record replay
  - support remote change Rpi video streaming parameters(brightness, fps, bitrate, video width, video height...)
 
 

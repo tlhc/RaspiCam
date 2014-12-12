@@ -32,7 +32,6 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
         self.clientcmd_record = 'record'
         SocketServer.BaseRequestHandler.__init__(self, request,
                                                  client_address, server)
-
     def handle(self):
         APPLOGGER.debug('theading number is ' + str(threading.activeCount()))
         data = self.request.recv(self.maxbuf)
