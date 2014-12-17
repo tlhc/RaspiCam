@@ -156,6 +156,7 @@ class RecordMng(object):
 
     def __watch_dog(self):
         """ watch the free space """
+        freespace = 0
         while 1:
             self.getlock()
             try:
@@ -164,10 +165,11 @@ class RecordMng(object):
             except OSError:
                 pass
             finally:
+                freespace = self.get_freespaces()
                 self.releaselock()
 
             APPLOGGER.debug('free space is: ' + \
-                    str(self.get_freespaces()) + 'MB')
+                    str(freespace) + 'MB')
             sleep(2)
 
 
