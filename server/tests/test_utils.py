@@ -30,7 +30,7 @@ class UtilsTest(TestCase):
 
         self.assertEqual(cfg.record.base, "'/home/pi/records'")
         self.assertEqual(cfg.record.cycle, True)
-        self.assertEqual(cfg.record.fsp_limit, 300)
+        self.assertEqual(cfg.record.fsp_limit, 250)
 
 if __name__ == '__main__':
     main()

@@ -18,7 +18,7 @@ class HttpServerTest(TestCase):
     """ HttpServerTest """
     IsSetup = False
     def setUp(self):
-        self.test_url = 'http://192.168.1.105:8080'
+        self.test_url = 'http://' + get_local_ip() + ':8080'
         if not self.IsSetup:
             self.setup_class()
             self.testthr = None
