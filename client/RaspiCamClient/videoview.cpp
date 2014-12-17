@@ -43,6 +43,7 @@ void VideoView::start() {
         return;
     }
     libvlc_media_t* vlcMedia = libvlc_media_new_location(_vlcInstance, _weburl.toStdString().c_str());
+    libvlc_media_add_option(vlcMedia, "network-caching=500");
     if (_recording) {
         Q_ASSERT(!_recordingFilePath.isEmpty());
 
