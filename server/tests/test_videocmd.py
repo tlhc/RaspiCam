@@ -21,7 +21,8 @@ class VideoCMDTest(TestCase):
     def test_generate_cmd(self):
         """ test generate cmd """
         cmdstr = ("raspivid -br 50 -w 1280 -h 800 -b 4500000 -fps 30 "
-                  "-vf -hf -t 0 -o - | cvlc stream:///dev/stdin "
+                  "-vf -hf -t 0 -o - | cvlc --sout-rtp-caching=10 "
+                  "stream:///dev/stdin "
                   "--sout '#rtp{sdp=rtsp://:9000/}' :demux=h264")
         self.assertEqual(self.cmd.cmd(), cmdstr)
     def test_change_cmd(self):
@@ -32,7 +33,8 @@ class VideoCMDTest(TestCase):
         self.cmd.height = 900
         self.cmd.bright = 60
         cmdstr = ("raspivid -br 60 -w 400 -h 900 -b 10000000 -fps 40 "
-                  "-vf -hf -t 0 -o - | cvlc stream:///dev/stdin "
+                  "-vf -hf -t 0 -o - | cvlc --sout-rtp-caching=10 "
+                  "stream:///dev/stdin "
                   "--sout '#rtp{sdp=rtsp://:9000/}' :demux=h264")
         self.assertEqual(self.cmd.cmd(), cmdstr)
     def test_record_cmd(self):
@@ -40,7 +42,8 @@ class VideoCMDTest(TestCase):
         self.cmd.record = True
         self.cmd.recordfname = 'test_record.mp4'
         cmdstr = ("raspivid -br 50 -w 1280 -h 800 -b 4500000 -fps 30 "
-                  "-vf -hf -t 0 -o - | cvlc stream:///dev/stdin "
+                  "-vf -hf -t 0 -o - | cvlc --sout-rtp-caching=10 "
+                  "stream:///dev/stdin "
                   "--sout '#duplicate{dst=rtp{sdp=rtsp://:9000/},"
                   "dst=standard{access=file,mux=mp4,"
                   "dst=test_record.mp4.mp4}}' :demux=h264")
