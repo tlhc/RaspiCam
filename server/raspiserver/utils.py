@@ -15,6 +15,8 @@ from json import dumps
 def get_local_ip():
     """ get local ip address """
     ipaddr = netifaces.ifaddresses('eth0')[netifaces.AF_INET][0]['addr']
+    if ipaddr is '':
+        raise AppException('ip address is null')
     return ipaddr
 
 class AppException(Exception):
@@ -73,6 +75,7 @@ class ServeCfg(object):
         self.tcp_port = 0
         self.http_port = 0
         self.vod_port = 0
+        self.address = ''    # not read from cfg file
 
 class ConfigObject(object):
     """ config object """
@@ -133,6 +136,16 @@ class ConfigReader(object):
                         if config_parser.has_option('common', 'vod_port'):
                             self.__config.comm_port.vod_port = \
                                     config_parser.getint('common', 'vod_port')
+
+                        # assign default values if value is invalid
+                        if not self.__config.comm_port.http_port:
+                            self.__config.comm_port.http_port = 8080
+                        if not self.__config.comm_port.tcp_port:
+                            self.__config.comm_port.tcp_port = 9999
+                        if not self.__config.comm_port.vod_port:
+                            self.__config.comm_port.vod_port = 9001
+                        self.__config.comm_port.address = get_local_ip()
+
                     except (AppException, ConfigError) as ex:
                         APPLOGGER.error(ex)
             else:

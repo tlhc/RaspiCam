@@ -76,21 +76,9 @@ def main():
     hyserve = HybirdServer()
     # you can start tcp server or http server
     try:
-        local_ip = get_local_ip()
-        tcpctl_port = cfg.comm_port.tcp_port \
-                if cfg.comm_port.tcp_port != 0 else 9999
-        http_port = cfg.comm_port.http_port \
-                if cfg.comm_port.http_port != 0 else 8080
-        vod_port = cfg.comm_port.vod_port \
-                if cfg.comm_port.vod_port != 0 else 9001
-        if local_ip == '':
-            raise AppException('local ip is empty')
-        hyserve.setservices('httpserver', httpserve, \
-                (local_ip, http_port, cfg, recmng, vvpmng))
-        hyserve.setservices('tcpserver', tcpserve, \
-                (local_ip, tcpctl_port, cfg, recmng, vvpmng))
-        hyserve.setservices('vodserver', vodserve, \
-                (local_ip, vod_port))
+        hyserve.setservices('httpserver', httpserve, (cfg, recmng, vvpmng))
+        hyserve.setservices('tcpserver', tcpserve, (cfg, recmng, vvpmng))
+        hyserve.setservices('vodserver', vodserve, (cfg,))
         hyserve.serve()
     except AppException as ex:
         APPLOGGER.error(ex)

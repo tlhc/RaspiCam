@@ -30,11 +30,10 @@ class TCPServerTest(TestCase):
         TestCase.setUp(self)
         config_parser = ConfigReader('/home/pi/server/config/raspicam.cfg')
         cfg = config_parser.parser()
-        server, port = get_local_ip(), 9999
         recmng = RecordMng(cfg.record)
         vvpmng = VideoProcessMng(cfg.video)
         self.testthr = threading.Thread(target=tcpserve, \
-                args=(server, port, cfg, recmng, vvpmng))
+                                        args=(cfg, recmng, vvpmng))
         self.testthr.setDaemon(True)
         self.testthr.start()
         sleep(5)

@@ -274,8 +274,10 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.send_response(503)
             self.end_headers()
 
-def httpserve(ipaddr, serve_port, cfg, recmng, vvpmng):
+def httpserve(cfg, recmng, vvpmng):
     """ httpserve """
+    ipaddr = cfg.comm_port.address
+    serve_port = cfg.comm_port.http_port
     try:
         if ipaddr is '':
             raise AppException('get local ip exp')
@@ -306,14 +308,12 @@ def __run():
     """ test function """
     from raspiserver.utils import ConfigReader
     from raspiserver.recordmng import RecordMng
-    from raspiserver.utils import get_local_ip
     from raspiserver.processmng import VideoProcessMng
     config_parser = ConfigReader('./config/raspicam.cfg')
     cfg = config_parser.parser()
-    server, port = get_local_ip(), 8080
     recmng = RecordMng(cfg.record)
     vvpmng = VideoProcessMng(cfg.video)
-    httpserve(server, port, cfg, recmng, vvpmng)
+    httpserve(cfg, recmng, vvpmng)
 
 if __name__ == '__main__':
     # run test python -m raspiserver.httpserver

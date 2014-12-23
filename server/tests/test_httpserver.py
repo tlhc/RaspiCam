@@ -29,11 +29,10 @@ class HttpServerTest(TestCase):
         config_parser = ConfigReader('/home/pi/server/config/raspicam.cfg')
         cfg = config_parser.parser()
         # test in local(Rpi)
-        server, port = get_local_ip(), 8080
         recmng = RecordMng(cfg.record)
         vvpmng = VideoProcessMng(cfg.video)
         self.testthr = threading.Thread(target=httpserve, \
-                args=(server, port, cfg, recmng, vvpmng))
+                                        args=(cfg, recmng, vvpmng))
         self.testthr.setDaemon(True)
         self.testthr.start()
 

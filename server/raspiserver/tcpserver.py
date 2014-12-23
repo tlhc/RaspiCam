@@ -243,8 +243,10 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
         else:
             APPLOGGER.error('request callback error')
 
-def tcpserve(ipaddr, serve_port, cfg, recmng, vvpmng):
+def tcpserve(cfg, recmng, vvpmng):
     """ tcpserve """
+    ipaddr = cfg.comm_port.address
+    serve_port = cfg.comm_port.tcp_port
     try:
         if ipaddr is '':
             raise AppException('get local ip exp')
@@ -270,15 +272,13 @@ def __run():
     """ test function """
     from raspiserver.recordmng import RecordMng
     from raspiserver.utils import ConfigReader
-    from raspiserver.utils import get_local_ip
     from raspiserver.processmng import VideoProcessMng
-    server, port = get_local_ip(), 9999
     config_path = './config/raspicam.cfg'
     cfg_parser = ConfigReader(config_path)
     cfg = cfg_parser.parser()
     recmng = RecordMng(cfg.record)
     vvpmng = VideoProcessMng(cfg.video)
-    tcpserve(server, port, cfg, recmng, vvpmng)
+    tcpserve(cfg, recmng, vvpmng)
 
 if __name__ == '__main__':
     __run()

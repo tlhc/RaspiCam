@@ -64,8 +64,10 @@ class VODReqHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             _setvodfile('')
 
 
-def vodserve(ipaddr, serve_port):
+def vodserve(cfg):
     """ vod serve """
+    ipaddr = cfg.comm_port.address
+    serve_port = cfg.comm_port.vod_port
     try:
         if ipaddr is '':
             raise AppException('get local ip exp')
@@ -87,9 +89,11 @@ def vodserve(ipaddr, serve_port):
 
 def __run():
     """ test run """
-    from raspiserver.utils import get_local_ip
-    server, port = get_local_ip(), 9001
-    vodserve(server, port)
+    from raspiserver.utils import ConfigReader
+    config_path = './config/raspicam.cfg'
+    cfg_parser = ConfigReader(config_path)
+    cfg = cfg_parser.parser()
+    vodserve(cfg)
 
 if __name__ == '__main__':
     __run()
