@@ -15,8 +15,13 @@ DlgRecord::DlgRecord(QWidget *parent) :
     _extDataSetUp();
 }
 
-void DlgRecord::setData(QHostAddress saddr, quint16 port) {
+void DlgRecord::setData(QHostAddress saddr, quint16 port, quint16 vodport) {
     if(_pctlc == NULL) {
+        if(vodport == 0) {
+            _vodport = 9001;    //default port
+        } else {
+            _vodport = vodport;
+        }
         _pctlc = new ControlClient(saddr, port);
         connect(_pctlc, SIGNAL(routeOut(QString)), this, SLOT(records(QString)));
         _vodprefix = "http://" + saddr.toString() + ":" + QString::number(_vodport);
@@ -54,6 +59,15 @@ void DlgRecord::on_btn_refresh_clicked() {
 }
 
 void DlgRecord::records(QString records) {
+    QStringList cmdlist = records.split("|");
+
+    if(!(cmdlist.length() == 2 &&
+       QString::compare(cmdlist[0], "records", Qt::CaseInsensitive) == 0)) {
+        return;
+    }
+    records.clear();
+    records = cmdlist[1];
+    //qDebug() << records;
     ui->tbl_records->clear();  /*clear item also clear signal mapping*/
     reclist.clear();
     reclist = records.split(',');
@@ -73,7 +87,7 @@ void DlgRecord::records(QString records) {
         ui->tbl_records->setCellWidget(reclist.indexOf(item), 1, delbtn);
         connect(delbtn, SIGNAL(clicked()), _mapper, SLOT(map()));
         _mapper->setMapping(delbtn, reclist.indexOf(item));
-        qDebug() << item << reclist.indexOf(item);
+        //qDebug() << item << reclist.indexOf(item);
     }
     connect(_mapper, SIGNAL(mapped(int)), this, SLOT(delclick(int)));
 }
@@ -81,7 +95,7 @@ void DlgRecord::records(QString records) {
 void DlgRecord::_extDataSetUp() {
     _pctlc = NULL;
     _mapper = new QSignalMapper(this);
-    _vodport = 9001;    //for vod over http
+    _vodport = 0;      //for vod over http
     _processtimer = new QTimer(this);
     _processtimer->setInterval(500);
     connect(_processtimer, SIGNAL(timeout()), this, SLOT(setplaypos()));

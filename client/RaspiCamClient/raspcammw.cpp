@@ -57,6 +57,7 @@ void RaspCamMW::_exDataSetUp() {
     connect(&_processtimer, SIGNAL(timeout()), this, SLOT(drawprocess()));
     _cntdown_msec = 5000;
     _ctlport = 9999;
+    _vodport = 0;
 }
 
 QString RaspCamMW::_getlecontant(QLineEdit *clts, QString orgkey) {
@@ -170,6 +171,11 @@ void RaspCamMW::recvmsg(QString msg) {
         ctlc = new ControlClient(_saddr, 9999); //ctl port
         connect(ctlc, SIGNAL(routeOut(QMap<QString,QString>)),
                 this, SLOT(recvvcmds(QMap<QString,QString>)));
+        connect(ctlc, SIGNAL(routeOut(QString)),
+                this, SLOT(recvcmdstr(QString)));
+        if(ctlc != NULL) {
+            ctlc->get_vodport();
+        }
     }
 
 }
@@ -193,6 +199,18 @@ void RaspCamMW::recvvcmds(QMap<QString, QString> params) {
         if(params.contains("fps")) {
             ui->le_fps->setText(params["fps"]);
         }
+    }
+}
+
+void RaspCamMW::recvcmdstr(QString cmd) {
+    QStringList cmdlist = cmd.split("|");
+    if(cmdlist.length() != 2) {
+        return;
+    }
+    if(QString::compare(cmdlist[0], "vodport", Qt::CaseInsensitive) == 0) {
+        _vodport = cmdlist[1].toInt();
+        disconnect(ctlc, SIGNAL(routeOut(QString)),
+                   this, SLOT(recvcmdstr(QString)));
     }
 }
 
@@ -253,7 +271,7 @@ void RaspCamMW::on_btn_remoteRcd_clicked() {
 void RaspCamMW::on_btn_getrecord_clicked() {
     DlgRecord *dlg = new DlgRecord(this);
     if (!_saddr.isNull()) {
-        dlg->setData(_saddr, _ctlport);
+        dlg->setData(_saddr, _ctlport, _vodport);
         dlg->exec();
     }
     delete dlg;

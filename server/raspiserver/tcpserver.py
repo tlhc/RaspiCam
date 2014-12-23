@@ -59,6 +59,7 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
                     APPLOGGER.info('subprocess not running')
             APPLOGGER.info('activeCount is ' + str(threading.activeCount()))
         finally:
+            self.request.close()
             self.vvpmng.releaselock()
 
     def __stop(self):
@@ -82,6 +83,7 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
         finally:
             self.vvpmng.process_cmd.record = False
             self.vvpmng.process_cmd.recordfname = ''
+            self.request.close()
             self.vvpmng.releaselock()
 
     def __get(self):
@@ -89,6 +91,7 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
         ipaddr, _ = self.server.server_address
         vport = self.vvpmng.process_cmd.rtsp_port
         self.request.sendall(str(ipaddr) + ':' + str(vport))
+        self.request.close()
 
     def __change(self, data):
         """ change video process paramters
@@ -134,6 +137,7 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
         finally:
             self.vvpmng.releaselock()
         self.request.sendall(self.vvpmng.process_cmd.cmd())
+        self.request.close()
 
     def __record(self):
         """ record video file """
@@ -173,6 +177,7 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
         finally:
             self.vvpmng.releaselock()
         self.request.sendall(self.vvpmng.process_cmd.cmd())
+        self.request.close()
 
     def __get_records(self):
         """ get record files """
@@ -183,6 +188,7 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
             msg = 'records|'
             msg += ','.join(reclist)
             self.request.sendall(msg)
+            self.request.close()
             self.recmng.releaselock()
 
     def __rm_records(self, data):
@@ -205,6 +211,7 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
             msg = 'records|'
             msg += ','.join(reclist)
             self.request.sendall(msg)
+            self.request.close()
             self.recmng.releaselock()
 
     def __get_vodport(self):
@@ -212,6 +219,7 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
         msg = 'vodport|'
         msg += str(self.server.vod_port)
         self.request.sendall(msg)
+        self.request.close()
 
     def __process_req(self, data):
         """ process req """

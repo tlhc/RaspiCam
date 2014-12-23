@@ -18,7 +18,7 @@ class DlgRecord : public QDialog
 
 public:
     explicit DlgRecord(QWidget *parent = 0);
-    void setData(QHostAddress saddr, quint16 port);
+    void setData(QHostAddress saddr, quint16 port, quint16 vodport);
     ~DlgRecord();
 
 private slots:

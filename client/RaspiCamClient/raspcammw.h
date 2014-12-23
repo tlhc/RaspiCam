@@ -29,6 +29,7 @@ private slots:
     void on_btnRecord_clicked();
     void recvmsg(QString msg);
     void recvvcmds(QMap<QString, QString> params);
+    void recvcmdstr(QString cmd);
     void laterstart();
     void drawprocess();
 
@@ -52,6 +53,7 @@ private:
     QTime _processtime;
     QHostAddress _saddr;
     quint16 _ctlport;
+    quint16 _vodport;
     int _cntdown_msec;
     QMap<QString, QString> orgval;
 };

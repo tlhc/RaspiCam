@@ -100,7 +100,11 @@ void TcpRequest::disconnected() {
 
 void TcpRequest::readall() {
     if(_socket->isReadable()) {
-        emit sigmsg(_socket->readAll());
+        QByteArray alldata;
+        while(!_socket->atEnd()) {
+            alldata += _socket->read(2048);
+        }
+        emit sigmsg(alldata);
         emit done();
     }
 }
