@@ -37,6 +37,7 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         self.send_header('Content-type', 'text/html')
         self.end_headers()
         self.wfile.write(msg)
+        self.wfile.flush()
 
     def do_GET(self):
         """ GET """
