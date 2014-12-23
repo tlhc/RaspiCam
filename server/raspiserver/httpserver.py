@@ -291,6 +291,7 @@ def httpserve(cfg, recmng, vvpmng):
                 raise AppException('parameter type not correct')
     except AppException as ex:
         APPLOGGER.error(ex)
+        sys.exit(1)
     APPLOGGER.info('Server Up IP=%s PORT=%s', ipaddr, serve_port)
     server = None
     try:

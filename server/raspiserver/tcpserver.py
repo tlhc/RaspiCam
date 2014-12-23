@@ -254,6 +254,7 @@ def tcpserve(cfg, recmng, vvpmng):
             raise AppException('port num err')
     except AppException as ex:
         APPLOGGER.error(ex)
+        sys.exit(1)
 
     host, port = ipaddr, int(serve_port)
     server = None

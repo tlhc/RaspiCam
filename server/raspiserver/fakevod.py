@@ -75,6 +75,7 @@ def vodserve(cfg):
             raise AppException('port num err')
     except AppException as ex:
         APPLOGGER.error(ex)
+        sys.exit(1)
     APPLOGGER.info('Server Up IP=%s PORT=%s', ipaddr, serve_port)
     server = None
     try:
