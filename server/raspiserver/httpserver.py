@@ -12,7 +12,7 @@ import threading
 import SocketServer
 import BaseHTTPServer
 from raspiserver.logger import APPLOGGER
-from raspiserver.utils import AppException
+from raspiserver.utils import AppException, any2json_fstr
 
 class HttpCtlServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
     """ ThreadedHTTPServer """
@@ -209,6 +209,41 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         finally:
             self.__sendmsg(200, 'record start')
             self.vvpmng.releaselock()
+
+    def __get_records(self, form):
+        """ get record files return a json format flist """
+        _ = form
+        self.recmng.getlock()
+        try:
+            reclist = self.recmng.get_recordfiles()
+        finally:
+            self.__sendmsg(200, any2json_fstr(reclist))
+            self.recmng.releaselock()
+
+    def __rm_records(self, form):
+        """ remove video record """
+        para_key = 'rm_fname'
+        file2rm = ''
+        if para_key in form.keys():
+            file2rm = form[para_key].value
+        else:
+            return
+        if file2rm:
+            allfiles = self.recmng.get_recordfiles()
+            if file2rm not in allfiles:
+                return
+        self.recmng.getlock()
+        ret = -1
+        try:
+            ret = self.recmng.rm_recordfiles(file2rm)
+        finally:
+            if ret == 0 or ret == 1:
+                APPLOGGER.info('rm success')
+            elif ret == -1:
+                APPLOGGER.info('rm failed')
+            reclist = self.recmng.get_recordfiles()
+            self.__sendmsg(200, any2json_fstr(reclist))
+            self.recmng.releaselock()
 
     def do_POST(self):
         """ POST """

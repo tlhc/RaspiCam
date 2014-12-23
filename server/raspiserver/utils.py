@@ -10,6 +10,7 @@ from ConfigParser import Error as ConfigError
 from ConfigParser import ConfigParser
 from threading import Lock
 from raspiserver.logger import APPLOGGER
+from json import dumps
 
 def get_local_ip():
     """ get local ip address """
@@ -151,3 +152,8 @@ class ConfigReader(object):
         """ set path """
         self.__path = value
     path = property(__get_path, __set_path)
+
+def any2json_fstr(flist):
+    """ file list to json for http response """
+    return dumps(flist)
+
