@@ -15,7 +15,8 @@ class TcpCtlServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     """ TCPServer """
     def __init__(self, server_address, RequestHandler, cfg, recmng, vvpmng):
         self.allow_reuse_address = True
-        self.cfg = cfg
+        # self.cfg = cfg
+        self.vod_port = cfg.comm_port.vod_port
         self.vvpmng = vvpmng
         self.recmng = recmng
         SocketServer.TCPServer.__init__(self, server_address, RequestHandler)
@@ -205,6 +206,12 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
             msg += ','.join(reclist)
             self.request.sendall(msg)
             self.recmng.releaselock()
+
+    def __get_vodport(self):
+        """ get vod port """
+        msg = 'vodport|'
+        msg += str(self.server.vod_port)
+        self.request.sendall(msg)
 
     def __process_req(self, data):
         """ process req """

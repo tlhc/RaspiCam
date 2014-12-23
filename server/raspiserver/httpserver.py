@@ -18,7 +18,7 @@ class HttpCtlServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
     """ ThreadedHTTPServer """
     def __init__(self, server_address, RequestHandler, cfg, recmng, vvpmng):
         self.allow_reuse_address = True
-        self.cfg = cfg
+        self.vod_port = cfg.comm_port.vod_port
         self.vvpmng = vvpmng
         self.recmng = recmng
         BaseHTTPServer.HTTPServer.__init__(self, server_address, RequestHandler)
@@ -245,6 +245,11 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             self.__sendmsg(200, any2json_fstr(reclist))
             self.recmng.releaselock()
 
+    def __get_vodport(self, form):
+        """ get the vod serve port from cfg file """
+        _ = form
+        self.__sendmsg(200, any2json_fstr(self.server.vod_port))
+
     def do_POST(self):
         """ POST """
         APPLOGGER.debug(self.path)
@@ -278,7 +283,7 @@ def httpserve(ipaddr, serve_port, cfg, recmng, vvpmng):
         if cfg == None:
             raise AppException('cfg is null')
         else:
-            from utils import ConfigObject
+            from raspiserver.utils import ConfigObject
             if type(cfg) != ConfigObject:
                 raise AppException('parameter type not correct')
     except AppException as ex:
