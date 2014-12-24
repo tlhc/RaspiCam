@@ -257,8 +257,9 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         try:
             _environ = {'REQUEST_METHOD': 'POST',
                         'CONTENT_TYPE': self.headers['Content-Type'],}
-        except KeyError:
+        except KeyError as ex:
             _environ = {}
+            APPLOGGER.warn(ex)
         form = cgi.FieldStorage(fp=self.rfile,
                                 headers=self.headers,
                                 environ=_environ)
