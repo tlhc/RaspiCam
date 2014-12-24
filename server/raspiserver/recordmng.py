@@ -4,6 +4,7 @@
 
 """ record manager """
 
+import sys
 from os import listdir
 from os import statvfs, remove, makedirs
 from os.path import isdir, join, isfile, exists, getctime, getsize
@@ -25,7 +26,16 @@ class RecordMng(object):
                 if cfg.base != '' else '/home/pi/records'
         self.lefthrhold = cfg.fsp_limit if cfg.fsp_limit != -1 else 100
         self.cycle = cfg.cycle if cfg.cycle != None else False
-
+        try:
+            if not exists(self.__recordbase):
+                makedirs(self.__recordbase)
+            elif not isdir(self.__recordbase):
+                remove(self.__recordbase)
+                makedirs(self.__recordbase)
+        except OSError as ex:
+            APPLOGGER.error(ex)
+            APPLOGGER.info('pls use sudo')
+            sys.exit(1)
         self.__watchthr = None
         self.__watchthr = Thread(target=self.__watch_dog)
         self.__watchthr.setDaemon(True)
