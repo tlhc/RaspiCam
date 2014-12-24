@@ -265,14 +265,17 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         action = self.path
         callinfo = action.replace('/', ' ').strip(' ')
         callinfo = '__' + callinfo
-        callback = getattr(self, '_' + self.__class__.__name__ + callinfo)
-        if callback != None and callable(callback):
-            callback(form)
-        else:
-            APPLOGGER.debug(self.path)
-            APPLOGGER.debug(str(form))
-            self.send_response(503)
-            self.end_headers()
+        try:
+            callback = getattr(self, '_' + self.__class__.__name__ + callinfo)
+            if callback != None and callable(callback):
+                callback(form)
+            else:
+                APPLOGGER.debug(self.path)
+                APPLOGGER.debug(str(form))
+                self.send_response(503)
+                self.end_headers()
+        except AttributeError as ex:
+            APPLOGGER.error(ex)
 
 def httpserve(cfg, recmng, vvpmng):
     """ httpserve """

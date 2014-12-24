@@ -233,15 +233,18 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
         if splitlen < 1 or splitlen > 2:
             APPLOGGER.warn('request parameter not correct')
             return
-        callback = getattr(self, '_' + \
-                self.__class__.__name__ + callinfo[0])
-        if callback != None and callable(callback):
-            if splitlen == 1:
-                callback()
+        try:
+            callback = getattr(self, '_' + \
+                    self.__class__.__name__ + callinfo[0])
+            if callback != None and callable(callback):
+                if splitlen == 1:
+                    callback()
+                else:
+                    callback(data)
             else:
-                callback(data)
-        else:
-            APPLOGGER.error('request callback error')
+                APPLOGGER.error('request callback error')
+        except AttributeError as ex:
+            APPLOGGER.error(ex)
 
 def tcpserve(cfg, recmng, vvpmng):
     """ tcpserve """
