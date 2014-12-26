@@ -10,6 +10,7 @@ TcpRequest::TcpRequest(QObject *parent, int keep_alive) :
     connect(_socket, SIGNAL(readyRead()), this, SLOT(readall()));
     connect(_socket, SIGNAL(error(QAbstractSocket::SocketError)),
             this, SLOT(error(QAbstractSocket::SocketError)));
+    connect(_socket, SIGNAL(readChannelFinished()), this, SLOT(readfinished()));
     if(keep_alive == 0) {
         _iskeep = 0;
     } else if(keep_alive == 1) {
@@ -100,12 +101,9 @@ void TcpRequest::disconnected() {
 
 void TcpRequest::readall() {
     if(_socket->isReadable()) {
-        QByteArray alldata;
         while(!_socket->atEnd()) {
-            alldata += _socket->read(2048);
+            _alldata += _socket->read(2048);
         }
-        emit sigmsg(alldata);
-        emit done();
     }
 }
 
@@ -114,4 +112,10 @@ void TcpRequest::error(QAbstractSocket::SocketError error) {
     if(error == QAbstractSocket::ConnectionRefusedError) {
         _socket->abort();
     }
+}
+
+void TcpRequest::readfinished() {
+    emit sigmsg(_alldata);
+    emit done();
+    _alldata.clear();
 }

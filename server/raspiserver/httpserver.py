@@ -19,6 +19,7 @@ class HttpCtlServer(SocketServer.ThreadingMixIn, BaseHTTPServer.HTTPServer):
     def __init__(self, server_address, RequestHandler, cfg, recmng, vvpmng):
         self.allow_reuse_address = True
         self.vod_port = cfg.comm_port.vod_port
+        self.rtsp_port = cfg.video.rtsp_port
         self.vvpmng = vvpmng
         self.recmng = recmng
         BaseHTTPServer.HTTPServer.__init__(self, server_address, RequestHandler)
@@ -78,6 +79,17 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         except IOError:
             self.send_error(404, 'File Not Found: %s' % self.path)
+
+    def __get_currparam(self, form):
+        """ get curr video parameter """
+        _ = form
+        paradict = {}
+        paradict = {'para_bright': self.vvpmng.process_cmd.bright,
+                    'para_fps' : self.vvpmng.process_cmd.fps,
+                    'para_bitrate' : self.vvpmng.process_cmd.bitrate,
+                    'para_width' : self.vvpmng.process_cmd.width,
+                    'para_height' : self.vvpmng.process_cmd.height}
+        self.__sendmsg(200, any2json_fstr(paradict))
 
     def __start(self, form):
         """ start the video process """
@@ -250,6 +262,11 @@ class HttpCtlHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         """ get the vod serve port from cfg file """
         _ = form
         self.__sendmsg(200, any2json_fstr(self.server.vod_port))
+
+    def __get_rtspport(self, form):
+        """ get the real stream video port """
+        _ = form
+        self.__sendmsg(200, any2json_fstr(self.server.rtsp_port))
 
     def do_POST(self):
         """ POST """

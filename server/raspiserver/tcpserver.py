@@ -187,7 +187,7 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
         finally:
             msg = 'records|'
             msg += ','.join(reclist)
-            self.request.sendall(msg)
+            self.request.sendall(msg + '\n')
             self.request.close()
             self.recmng.releaselock()
 

@@ -18,9 +18,7 @@ public:
     bool isconnected();
     bool isprocessing();
     int status();
-private:
-    QTcpSocket *_socket;
-    int _iskeep;
+
 signals:
     void sigmsg(QString msg);
     void done();
@@ -28,6 +26,11 @@ public slots:
     void disconnected();
     void readall();
     void error(QAbstractSocket::SocketError error);
+    void readfinished();
+private:
+    QTcpSocket *_socket;
+    int _iskeep;
+    QByteArray _alldata;
 };
 
 #endif // TCPREQUEST_H
