@@ -66,7 +66,7 @@ class HybirdServer(object):
 
 def main():
     """ serve for all """
-    config_path = './config/raspicam.cfg'
+    config_path = '/home/pi/server/config/raspicam.cfg'
     cfg_parser = ConfigReader(config_path)
     cfg = cfg_parser.parser()
     recmng = RecordMng(cfg.record)
