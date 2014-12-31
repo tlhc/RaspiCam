@@ -221,6 +221,11 @@ class TcpCtlHandler(SocketServer.BaseRequestHandler):
         self.request.sendall(msg)
         self.request.close()
 
+    def __get_currparams(self):
+        """ get curr video param ugly and lazy..."""
+        self.request.sendall(self.vvpmng.process_cmd.cmd())
+        self.request.close()
+
     def __process_req(self, data):
         """ process req """
         data = data.strip(' \n')

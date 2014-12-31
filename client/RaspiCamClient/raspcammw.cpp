@@ -175,6 +175,7 @@ void RaspCamMW::recvmsg(QString msg) {
                 this, SLOT(recvcmdstr(QString)));
         if(ctlc != NULL) {
             ctlc->get_vodport();
+            ctlc->get_currparams();
         }
     }
 
@@ -215,6 +216,7 @@ void RaspCamMW::recvcmdstr(QString cmd) {
 }
 
 void RaspCamMW::laterstart() {
+
     if(_vview != NULL) {
         if(!_vview->isStart()) {
             _vview->start();

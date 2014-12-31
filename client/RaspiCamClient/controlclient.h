@@ -19,6 +19,7 @@ public:
     void record();
     void get_records();
     void get_vodport();
+    void get_currparams();
     void rm_records(QString params);
 signals:
     void routeOut(QMap<QString, QString>);

@@ -10,7 +10,7 @@ ControlClient::ControlClient(QHostAddress server, quint16 port, QObject *parent)
     connect(_request, SIGNAL(sigmsg(QString)), this, SLOT(servermsg(QString)));
     _raspcmd_prefix = "raspivid";
     _supportcmds << "start" << "stop" << "change" << "record" << "get_records"
-                 << "rm_records" << "get_vodport";
+                 << "rm_records" << "get_vodport" << "get_currparams";
     _dftwaitmsec = 100;
 }
 
@@ -64,13 +64,17 @@ void ControlClient::get_vodport() {
     _sig_cmd("get_vodport");
 }
 
+void ControlClient::get_currparams() {
+    _sig_cmd("get_currparams");
+}
+
 void ControlClient::rm_records(QString params) {
     _para_cmd("rm_records", params);
 }
 
 
 void ControlClient::servermsg(QString msg) {
-    //qDebug() << Q_FUNC_INFO << msg;
+    qDebug() << Q_FUNC_INFO << msg;
     QStringList cmds = msg.split("|");
     if(cmds.length() == 2) {
         if(cmds[0].compare("records", Qt::CaseInsensitive) == 0 ||
