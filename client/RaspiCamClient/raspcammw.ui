@@ -155,7 +155,7 @@
       <rect>
        <x>10</x>
        <y>50</y>
-       <width>194</width>
+       <width>199</width>
        <height>95</height>
       </rect>
      </property>
@@ -192,6 +192,13 @@
        <widget class="QPushButton" name="btn_getrecord">
         <property name="text">
          <string>GetRecord</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QPushButton" name="btnSnap">
+        <property name="text">
+         <string>Snapshot</string>
         </property>
        </widget>
       </item>

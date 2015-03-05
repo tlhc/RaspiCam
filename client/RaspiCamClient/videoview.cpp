@@ -84,6 +84,13 @@ void VideoView::stop() {
     _start = false;
 }
 
+void VideoView::snapshot(const QString &name) {
+    Q_ASSERT(_vlcMediaPlayer);
+    if(!name.isEmpty()) {
+        libvlc_video_take_snapshot(_vlcMediaPlayer, 0, name.toStdString().c_str(), 0, 0);
+    }
+}
+
 void VideoView::startRecording(const QString &filePath) {
     Q_ASSERT(_vlcMediaPlayer);
     Q_ASSERT(!_recording);

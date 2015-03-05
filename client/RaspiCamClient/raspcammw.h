@@ -32,12 +32,10 @@ private slots:
     void recvcmdstr(QString cmd);
     void laterstart();
     void drawprocess();
-
     void on_btn_confirm_clicked();
-
     void on_btn_remoteRcd_clicked();
-
     void on_btn_getrecord_clicked();
+    void on_btnSnap_clicked();
 
 private:
     void _extUISetUp();

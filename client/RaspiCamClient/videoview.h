@@ -12,6 +12,7 @@ public:
     ~VideoView();
     void start();
     void stop();
+    void snapshot(const QString &name);
 
     void startRecording(const QString& filePath);
     void stopRecording();

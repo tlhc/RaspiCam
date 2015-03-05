@@ -1,3 +1,4 @@
+#include <QDir>
 #include "tcprequest.h"
 #include "ui_raspcammw.h"
 #include "raspcammw.h"
@@ -46,6 +47,7 @@ void RaspCamMW::_extUISetUp() {
     ui->le_width->setEnabled(false);
     ui->btn_remoteRcd->setEnabled(false);
     ui->btn_getrecord->setEnabled(false);
+    ui->btnSnap->setEnabled(false);
 }
 
 void RaspCamMW::_exDataSetUp() {
@@ -158,6 +160,7 @@ void RaspCamMW::recvmsg(QString msg) {
     ui->le_height->setEnabled(true);
     ui->le_width->setEnabled(true);
     ui->btn_getrecord->setEnabled(true);
+    ui->btnSnap->setEnabled(true);
 
 
     //verify in netscaner so no need to verify here
@@ -277,4 +280,19 @@ void RaspCamMW::on_btn_getrecord_clicked() {
         dlg->exec();
     }
     delete dlg;
+}
+
+void RaspCamMW::on_btnSnap_clicked() {
+    if(_vview->isStart()) {
+        if(!QDir::current().entryList(QDir::Dirs).contains("snapshots")) {
+            QDir current = QDir::current();
+            if(!current.mkdir(QDir::currentPath() + QString("/snapshots"))) {
+                return;
+            }
+        }
+        QString sname = "./snapshots/snapshot_";
+        sname.append(QDateTime::currentDateTime().toString("yyyy_MM_dd-hh:mm:ss"));
+        sname.append(".png");    //default to png
+        _vview->snapshot(sname);
+    }
 }
