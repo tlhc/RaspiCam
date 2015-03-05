@@ -41,6 +41,7 @@ Software:
  - support start, stop control
  - support record and remote-record control
  - support video record replay
+ - support local snapshot
  - support remote change Rpi video streaming parameters(brightness, fps, bitrate, video width, video height...)
 
 
